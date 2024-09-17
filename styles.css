@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+h1 {
+    font-size: 2.5em;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+h2 {
+    font-size: 2em;
+    margin-top: 20px;
+}
+
+h3 {
+    font-size: 1.5em;
+    margin-top: 15px;
+    color: #555;
+}
+
+ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+img {
+    max-width: 150px; /* Set a fixed width for the image */
+    height: auto;
+    display: block;
+}
+
+.profile-container {
+    display: flex;
+    align-items: flex-start; /* Align items to the start of the container */
+}
+
+.info {
+    flex: 1; /* Allow the info section to take available space */
+}
+
+.profile-picture {
+    margin-left: 20px; /* Spacing between the info and the picture */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Optional: Add a footer style */
+footer {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+    text-align: center;
+}
+
