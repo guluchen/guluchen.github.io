@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QLDPC Distance Computation Slides</title>
+    <style>
+        :root {
+            --bg: #f3efe3;
+            --paper: rgba(255, 252, 245, 0.88);
+            --ink: #172321;
+            --muted: #5f6e69;
+            --line: rgba(23, 35, 33, 0.12);
+            --accent: #0f766e;
+            --accent-2: #e76f51;
+            --accent-3: #f4a261;
+            --shadow: 0 24px 60px rgba(23, 35, 33, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.10), transparent 34%),
+                radial-gradient(circle at 80% 20%, rgba(231, 111, 81, 0.10), transparent 28%),
+                linear-gradient(180deg, #f8f4ea 0%, #efe9dc 100%);
+            overflow: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::before {
+            width: 36vw;
+            height: 36vw;
+            top: -12vw;
+            right: -10vw;
+            background: rgba(15, 118, 110, 0.08);
+            filter: blur(14px);
+        }
+
+        body::after {
+            width: 26vw;
+            height: 26vw;
+            bottom: -10vw;
+            left: -8vw;
+            background: rgba(244, 162, 97, 0.12);
+            filter: blur(12px);
+        }
+
+        .deck {
+            position: relative;
+            z-index: 1;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 1.5rem;
+            padding: 3.2rem 4.2rem 2.4rem;
+            opacity: 0;
+            transform: translateX(30px) scale(0.985);
+            transition: opacity 280ms ease, transform 280ms ease;
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .chrome {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.8rem;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(10px);
+        }
+
+        .tag::before {
+            content: "";
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .panel {
+            background: var(--paper);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            padding: 2rem 2.2rem;
+            backdrop-filter: blur(16px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        h1, h2, h3, p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(2.6rem, 4vw, 4.8rem);
+            line-height: 0.96;
+            letter-spacing: -0.04em;
+            max-width: 12ch;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 3vw, 3.2rem);
+            line-height: 1;
+            letter-spacing: -0.035em;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            margin-bottom: 0.85rem;
+        }
+
+        .lede {
+            font-size: 1.2rem;
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 54ch;
+            margin-top: 1.2rem;
+        }
+
+        .authors {
+            margin-top: 1.2rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--muted);
+        }
+
+        .big-number {
+            font-size: clamp(4rem, 9vw, 7rem);
+            line-height: 0.88;
+            letter-spacing: -0.06em;
+            color: var(--accent);
+        }
+
+        .big-label {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--muted);
+            max-width: 20ch;
+        }
+
+        .grid-2,
+        .grid-3 {
+            display: grid;
+            gap: 1.2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .card {
+            padding: 1.25rem 1.3rem;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(23, 35, 33, 0.08);
+        }
+
+        .card strong,
+        .mini-title {
+            display: block;
+            font-size: 1.02rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .card p,
+        .card li,
+        .bullet-list li,
+        .tight p {
+            font-size: 1.03rem;
+            line-height: 1.55;
+            color: var(--muted);
+        }
+
+        .bullet-list,
+        .clean-list {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        .bullet-list li + li,
+        .clean-list li + li {
+            margin-top: 0.6rem;
+        }
+
+        .formula {
+            font-family: "Menlo", "SFMono-Regular", "Consolas", monospace;
+            font-size: 1.05rem;
+            line-height: 1.65;
+            padding: 1rem 1.15rem;
+            border-radius: 22px;
+            background: #162826;
+            color: #eff9f7;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        .micro-formula {
+            margin-top: 0.85rem;
+            font-size: 0.84rem;
+            line-height: 1.45;
+            padding: 0.85rem 0.95rem;
+        }
+
+        .table-wrap {
+            overflow: hidden;
+            border-radius: 24px;
+            border: 1px solid rgba(23, 35, 33, 0.08);
+            background: rgba(255, 255, 255, 0.76);
+        }
+
+        .formal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.93rem;
+            line-height: 1.45;
+        }
+
+        .formal-table th,
+        .formal-table td {
+            padding: 0.9rem 0.95rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(23, 35, 33, 0.08);
+        }
+
+        .formal-table th {
+            background: rgba(15, 118, 110, 0.08);
+            color: var(--ink);
+            font-size: 0.83rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .formal-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .formal-table td {
+            color: var(--muted);
+        }
+
+        .formal-table strong {
+            color: var(--ink);
+        }
+
+        .caption-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-top: 1rem;
+        }
+
+        .caption-row .note {
+            max-width: 44ch;
+        }
+
+        .timeline {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 1.2rem 1fr;
+            gap: 0.9rem;
+            align-items: start;
+        }
+
+        .dot {
+            width: 1rem;
+            height: 1rem;
+            margin-top: 0.35rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.08);
+        }
+
+        .emphasis {
+            color: var(--ink);
+            font-weight: 650;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 1.2rem;
+        }
+
+        .scoreboard {
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 12rem 1fr auto;
+            gap: 0.8rem;
+            align-items: center;
+            font-size: 0.98rem;
+        }
+
+        .score-row span:last-child {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .bar {
+            height: 0.7rem;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(23, 35, 33, 0.08);
+        }
+
+        .bar > i {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--accent), var(--accent-3));
+        }
+
+        .note {
+            font-size: 0.93rem;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress {
+            flex: 1;
+            height: 0.45rem;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(23, 35, 33, 0.1);
+        }
+
+        .progress > i {
+            display: block;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 220ms ease;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .nav {
+            position: fixed;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            z-index: 3;
+            display: flex;
+            gap: 0.7rem;
+        }
+
+        .nav button {
+            border: 0;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: rgba(23, 35, 33, 0.92);
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 14px 28px rgba(23, 35, 33, 0.2);
+            transition: transform 160ms ease, background 160ms ease;
+        }
+
+        .nav button:hover {
+            transform: translateY(-2px);
+            background: #0f3431;
+        }
+
+        .kbd {
+            font-family: "Menlo", "SFMono-Regular", "Consolas", monospace;
+            font-size: 0.84rem;
+            padding: 0.2rem 0.45rem;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--muted);
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        @media (max-width: 1100px) {
+            .slide {
+                padding: 2rem 1.5rem 1.4rem;
+            }
+
+            .hero,
+            .grid-2,
+            .grid-3,
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck">
+        <section class="slide active">
+            <div class="chrome">
+                <div class="tag">English HTML Slides</div>
+                <div>Prepared from arXiv v1 · May 29, 2026</div>
+            </div>
+            <div class="hero">
+                <div class="panel">
+                    <h3>Title</h3>
+                    <h1>SAT, MaxSAT, and SMT for QLDPC Distance Computation</h1>
+                    <p class="lede">A presentation-style walkthrough of the paper’s motivation, formulations, benchmark design, and the main empirical takeaways for exact QLDPC distance computation.</p>
+                    <div class="authors">
+                        Yu-Fang Chen · Seyed Mohammad Reza Jafari · Ching-Yi Lai<br>
+                        Academia Sinica · National Taiwan University · National Yang Ming Chiao Tung University
+                    </div>
+                </div>
+                <div class="panel tight">
+                    <h3>Why This Matters</h3>
+                    <div class="big-number">QLDPC</div>
+                    <p class="big-label">Modern fault-tolerant code families need exact distance certification, but the solver landscape is still poorly understood.</p>
+                    <div class="card" style="margin-top: 1.3rem;">
+                        <strong>Paper goal</strong>
+                        <p>Compare SAT, SMT, MaxSAT, and strong non-SAT baselines on a shared benchmark suite and identify what actually drives scalability.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>1 / 10</span><span class="kbd">←</span><span class="kbd">→</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Problem Setup</div>
+                <div>What are we solving?</div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <h2>Exact distance is a bottleneck</h2>
+                    <ul class="bullet-list">
+                        <li>The code distance determines the minimum-weight logical operator.</li>
+                        <li>That distance directly reflects worst-case error-correcting capability.</li>
+                        <li>For modern QLDPC constructions, distance is often much harder to obtain than size or sparsity.</li>
+                        <li>As code families scale, exact distance computation becomes a practical certification bottleneck.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h2>CSS view used in the paper</h2>
+                    <div class="formula">
+                        HX HZᵀ = 0
+                        <br><br>
+                        dZ = min wt(z)
+                        <br>subject to HX zᵀ = 0 and z ∉ row(HZ)
+                        <br><br>
+                        dX = min wt(x)
+                        <br>subject to HZ xᵀ = 0 and x ∉ row(HX)
+                        <br><br>
+                        d = min(dX, dZ)
+                    </div>
+                    <p class="note" style="margin-top: 1rem;">The hard part is not just finding a candidate logical operator, but proving there is no better one below a target weight.</p>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>2 / 10</span><span class="kbd">Space</span><span class="kbd">Shift+Space</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Formulations</div>
+                <div>SAT vs MaxSAT</div>
+            </div>
+            <div class="grid-3">
+                <div class="panel">
+                    <h2>SAT formulation</h2>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="dot"></div>
+                            <div>
+                                <strong class="mini-title">Parity constraints</strong>
+                                <p>Encode stabilizer checks such as even-parity XOR relations.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="dot"></div>
+                            <div>
+                                <strong class="mini-title">Nontriviality constraints</strong>
+                                <p>Enforce that the candidate is not generated by stabilizer rows.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="dot"></div>
+                            <div>
+                                <strong class="mini-title">Weight bound</strong>
+                                <p>Use a cardinality constraint to ask whether wt(x) ≤ w.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="note" style="margin-top: 1rem;">Exact distance is found by solving a sequence of SAT instances for increasing thresholds.</p>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Example</strong>
+                        <p>Suppose a row of <span class="emphasis">H<sub>X</sub></span> touches qubits 1, 2, and 4, and we test whether there is a logical operator of weight at most 2.</p>
+                        <div class="formula micro-formula">
+                            parity: x₁ ⊕ x₂ ⊕ x₄ = 0
+                            <br>nontriviality: y₁ ∨ y₂
+                            <br>weight bound: x₁ + x₂ + x₃ + x₄ ≤ 2
+                            <br><br>
+                            query: “Is there any satisfying assignment?”
+                            <br>if SAT, then distance ≤ 2; if UNSAT, then distance &gt; 2
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>MaxSAT formulation</h2>
+                    <div class="card">
+                        <strong>Hard clauses</strong>
+                        <p>Parity and nontriviality constraints must always hold.</p>
+                    </div>
+                    <div class="card" style="margin-top: 0.9rem;">
+                        <strong>Soft clauses</strong>
+                        <p>Each variable gets a soft clause favoring 0, so the solver minimizes operator weight directly.</p>
+                    </div>
+                    <p class="note" style="margin-top: 1rem;">This avoids repeated threshold search and turns the task into an optimization problem.</p>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Example</strong>
+                        <p>For four qubits, keep parity and nontriviality as hard clauses, then add one soft clause per variable:</p>
+                        <div class="formula micro-formula">
+                            hard: parity + nontriviality
+                            <br>soft: (¬x₁), (¬x₂), (¬x₃), (¬x₄)
+                            <br><br>
+                            assignment A: (1,0,0,0) satisfies 3 soft clauses
+                            <br>assignment B: (1,1,0,0) satisfies 2 soft clauses
+                            <br><br>
+                            MaxSAT prefers A, because it corresponds to a lower-weight logical operator.
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>Core question</h2>
+                    <ul class="bullet-list">
+                        <li>Parity constraints are handled either natively as XORs or via Tseitin-style CNF translation.</li>
+                        <li>Nontriviality is reduced to a dual-logical-operator test such as <span class="emphasis">L<sub>X</sub>x<sup>T</sup> ≠ 0</span>.</li>
+                        <li>Cardinality constraints are where formulation choices become crucial: sequential-counter, totalizer, or binary.</li>
+                    </ul>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Technical angle</strong>
+                        <p>The paper studies not only solver families, but also how the encoding interface changes solver behavior on the same QLDPC task.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>3 / 10</span><span class="kbd">Esc</span><span>refreshes nothing</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Benchmarks</div>
+                <div>Formal benchmark table</div>
+            </div>
+            <div class="panel">
+                <h2>Benchmark families used in the paper</h2>
+                <div class="table-wrap" style="margin-top: 1rem;">
+                    <table class="formal-table">
+                        <thead>
+                            <tr>
+                                <th>Family</th>
+                                <th>Representative instances</th>
+                                <th>Count</th>
+                                <th>Row wt.</th>
+                                <th>Col wt.</th>
+                                <th>Structural character</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>BB / GB</strong></td>
+                                <td>BB 72 12 6, BB 144 12 12, BB 288 12 ?, GB 144 12 8, GB 144 12 12</td>
+                                <td>9</td>
+                                <td>6-8</td>
+                                <td>3-5</td>
+                                <td>Algebraically regular, sparse circulant-style structure</td>
+                            </tr>
+                            <tr>
+                                <td><strong>LP</strong></td>
+                                <td>LP 34 20 2, LP 238 44 6, LP 544 80 12, LP 1768 224 ?</td>
+                                <td>8</td>
+                                <td>8</td>
+                                <td>5</td>
+                                <td>Larger lifted-product search spaces with weaker regularity</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TN</strong></td>
+                                <td>TN 36 8 3, TN 72 8 8, TN 144 2 13, TN 250 10 15, TN 360 4 ?</td>
+                                <td>10</td>
+                                <td>6-12</td>
+                                <td>4-9</td>
+                                <td>Expander/Tanner style structure and difficult transition-region behavior</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="caption-row">
+                    <p class="note">The naming convention is roughly <span class="emphasis">{family} {n} {k} {d}</span>, where <span class="emphasis">?</span> denotes a distance not yet certified in the source benchmark collection.</p>
+                    <p class="note">Across all three families, the paper evaluates <span class="emphasis">27 total instances</span> spanning small easy cases through hard transition-region benchmarks.</p>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>4 / 10</span><span>27 benchmarks</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Evaluation</div>
+                <div>Study design</div>
+            </div>
+            <div class="comparison">
+                <div class="panel">
+                    <h2>Experimental matrix</h2>
+                    <div class="table-wrap" style="margin-top: 1rem;">
+                        <table class="formal-table">
+                            <thead>
+                                <tr>
+                                    <th>Axis</th>
+                                    <th>What varies</th>
+                                    <th>Role in the study</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Benchmarks</strong></td>
+                                    <td>27 QLDPC instances across BB/GB, LP, and TN families</td>
+                                    <td>Expose easy, moderate, and transition-region behavior</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Solvers</strong></td>
+                                    <td>21 tools spanning SAT, SMT, MaxSAT, and non-SAT baselines</td>
+                                    <td>Compare paradigms rather than one solver line</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Configurations</strong></td>
+                                    <td>46 representative configurations in the full heatmap</td>
+                                    <td>Separate solver-family effects from encoding effects</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Timeouts</strong></td>
+                                    <td>3-minute pre-evaluation, 2-hour main evaluation</td>
+                                    <td>Filter dominated encodings before large-scale comparison</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>Cardinality pre-evaluation</h2>
+                    <div class="table-wrap" style="margin-top: 1rem;">
+                        <table class="formal-table">
+                            <thead>
+                                <tr>
+                                    <th>Encoding</th>
+                                    <th>Solved</th>
+                                    <th>Timeout</th>
+                                    <th>Fastest</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Sequential-counter</strong></td>
+                                    <td>218</td>
+                                    <td>79</td>
+                                    <td>133</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Totalizer</strong></td>
+                                    <td>224</td>
+                                    <td>73</td>
+                                    <td>92</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Binary</strong></td>
+                                    <td>151</td>
+                                    <td>146</td>
+                                    <td>0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Implication</strong>
+                        <p>Binary encoding is empirically dominated, so the main experiments focus on <span class="emphasis">sequential-counter</span> and <span class="emphasis">totalizer</span> as the competitive formulations.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>5 / 10</span><span>Protocol</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Finding 1</div>
+                <div>Optimization and cardinality dominate</div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <h2>XOR is not the whole story</h2>
+                    <p class="lede" style="margin-top: 0;">The paper’s central claim is that the practical bottleneck is <span class="emphasis">not parity reasoning alone</span>. The harder part is handling cardinality constraints and proving optimality.</p>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Interpretation</strong>
+                        <p>Even though the formulation is rich in XOR constraints, native XOR-aware SAT did not show a systematic advantage across the benchmark suite.</p>
+                    </div>
+                    <div class="card" style="margin-top: 0.9rem;">
+                        <strong>Why that matters</strong>
+                        <p>This challenges the intuition that “more XOR support” should automatically translate into better QLDPC distance solving.</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>What mattered more?</h2>
+                    <div class="scoreboard">
+                        <div class="score-row">
+                            <span>Optimization architecture</span>
+                            <div class="bar"><i style="width: 96%;"></i></div>
+                            <span>very high</span>
+                        </div>
+                        <div class="score-row">
+                            <span>Cardinality encoding</span>
+                            <div class="bar"><i style="width: 84%;"></i></div>
+                            <span>high</span>
+                        </div>
+                        <div class="score-row">
+                            <span>Native XOR support</span>
+                            <div class="bar"><i style="width: 38%;"></i></div>
+                            <span>limited</span>
+                        </div>
+                    </div>
+                    <p class="note" style="margin-top: 1rem;">This visual is a presentation summary of the paper’s empirical conclusion, not a literal chart from the paper.</p>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>6 / 10</span><span>Main message</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Finding 2</div>
+                <div>MaxSAT is the strongest frontier</div>
+            </div>
+            <div class="comparison">
+                <div class="panel">
+                    <h2>Transition-region benchmarks tell the real story</h2>
+                    <p class="lede" style="margin-top: 0;">Easy instances make many solvers look good. The informative cases are the <span class="emphasis">transition-region</span> benchmarks, where some methods still solve and others start timing out.</p>
+                    <ul class="bullet-list" style="margin-top: 1rem;">
+                        <li>Branch-and-bound MaxSAT stayed competitive on the hardest cases.</li>
+                        <li>MaxCDCL achieved the strongest overall coverage in the curated comparison.</li>
+                        <li>Gurobi remained a serious baseline and was sometimes comparable or faster on hard instances.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h2>Key separation</h2>
+                    <div class="card">
+                        <strong>Stronger on hard cases</strong>
+                        <p>Branch-and-bound MaxSAT, MIP, and a few strong exact baselines.</p>
+                    </div>
+                    <div class="card" style="margin-top: 0.9rem;">
+                        <strong>Competitive but earlier plateau</strong>
+                        <p>Conventional SAT, SMT, XOR-aware SAT, and unsat-core-guided MaxSAT.</p>
+                    </div>
+                    <div class="card" style="margin-top: 0.9rem;">
+                        <strong>Important nuance</strong>
+                        <p>Not all MaxSAT solvers behave alike. Solver architecture itself is a major explanatory variable.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>7 / 10</span><span>Transition region</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Finding 3</div>
+                <div>Old intuitions do not transfer cleanly</div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <h2>Brouwer-Zimmermann weakens in QLDPC</h2>
+                    <ul class="bullet-list">
+                        <li>The Magma implementation often finds good candidate upper bounds.</li>
+                        <li>But it is substantially weaker at proving that no better solution exists.</li>
+                        <li>That means classical-code distance techniques do not carry over cleanly to the QLDPC regime.</li>
+                    </ul>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Presentation takeaway</strong>
+                        <p>Finding a low-weight logical operator and certifying optimality are computationally different tasks.</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>Recommended hard benchmarks</h2>
+                    <ul class="clean-list">
+                        <li>BB 144 12 12</li>
+                        <li>GB 144 12 12</li>
+                        <li>BB 144 14 14</li>
+                        <li>LP 442 68 10</li>
+                        <li>LP 544 80 12</li>
+                        <li>TN 144 2 13</li>
+                        <li>TN 250 10 15</li>
+                    </ul>
+                    <p class="note" style="margin-top: 1rem;">The paper argues these transition-region instances are the most discriminative for future solver comparisons.</p>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>8 / 10</span><span>Benchmark advice</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">One-Slide Summary</div>
+                <div>If you only remember four points</div>
+            </div>
+            <div class="panel">
+                <h2>What this paper changes</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <strong>1. QLDPC distance is not “just an XOR problem”</strong>
+                        <p>The hardest part is tied to cardinality management and optimality certification.</p>
+                    </div>
+                    <div class="card">
+                        <strong>2. Optimization-oriented methods define the frontier</strong>
+                        <p>Especially branch-and-bound MaxSAT and strong MIP-based baselines.</p>
+                    </div>
+                    <div class="card">
+                        <strong>3. MaxSAT is not one monolithic category</strong>
+                        <p>Branch-and-bound and unsat-core-guided approaches behave qualitatively differently.</p>
+                    </div>
+                    <div class="card">
+                        <strong>4. Benchmark choice matters</strong>
+                        <p>Transition-region instances are far more informative than uniformly easy or hopeless ones.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>9 / 10</span><span>Recap</span></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="chrome">
+                <div class="tag">Closing</div>
+                <div>Resources and next step</div>
+            </div>
+            <div class="hero">
+                <div class="panel">
+                    <h2>Suggested closing message</h2>
+                    <p class="lede" style="margin-top: 0;">For exact QLDPC distance computation, solver success is driven less by parity reasoning than by how well the method handles optimization structure, cardinality constraints, and proof of optimality.</p>
+                    <div class="card" style="margin-top: 1rem;">
+                        <strong>Paper</strong>
+                        <p><a href="https://arxiv.org/abs/2606.12445">arXiv:2606.12445</a></p>
+                    </div>
+                    <div class="card" style="margin-top: 0.9rem;">
+                        <strong>Code / platform</strong>
+                        <p><a href="https://github.com/guluchen/QDistSAT">github.com/guluchen/QDistSAT</a></p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>Reproducibility</h2>
+                    <ul class="bullet-list">
+                        <li>The paper introduces an open experimental platform, <span class="emphasis">DistQLDPC</span>, derived from MaxCDCL.</li>
+                        <li>It reports both certified lower and upper bounds when exact convergence is not reached.</li>
+                        <li>This makes optimization-oriented runs easier to compare with incremental SAT workflows.</li>
+                    </ul>
+                    <p class="note" style="margin-top: 1rem;">For a public-facing website version, we can later shorten the table-heavy slides and keep this fuller version as the seminar deck.</p>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="progress"><i></i></div>
+                <div class="pager"><span>10 / 10</span><span>End</span></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="nav">
+        <button type="button" id="prevBtn" aria-label="Previous slide">←</button>
+        <button type="button" id="nextBtn" aria-label="Next slide">→</button>
+    </div>
+
+    <script>
+        const slides = Array.from(document.querySelectorAll(".slide"));
+        const progressBars = Array.from(document.querySelectorAll(".progress > i"));
+        let current = 0;
+
+        function render() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle("active", index === current);
+            });
+
+            const ratio = ((current + 1) / slides.length) * 100;
+            progressBars.forEach((bar) => {
+                bar.style.width = `${ratio}%`;
+            });
+        }
+
+        function goTo(index) {
+            current = Math.max(0, Math.min(index, slides.length - 1));
+            render();
+        }
+
+        function next() {
+            goTo(current + 1);
+        }
+
+        function prev() {
+            goTo(current - 1);
+        }
+
+        document.getElementById("nextBtn").addEventListener("click", next);
+        document.getElementById("prevBtn").addEventListener("click", prev);
+
+        window.addEventListener("keydown", (event) => {
+            if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+                event.preventDefault();
+                next();
+            }
+            if (["ArrowLeft", "PageUp"].includes(event.key)) {
+                event.preventDefault();
+                prev();
+            }
+            if (event.key === "Home") {
+                event.preventDefault();
+                goTo(0);
+            }
+            if (event.key === "End") {
+                event.preventDefault();
+                goTo(slides.length - 1);
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>
