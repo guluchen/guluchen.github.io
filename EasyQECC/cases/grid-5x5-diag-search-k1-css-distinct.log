@@ -1,0 +1,311 @@
+search jobs=12 (CPU default=14)
+parallel search: 144 candidates, 12 worker(s)
+  finished n=19 k>=18 -> unsat in 7ms (paper-index 9)
+  finished n=23 k>=22 -> unsat in 7ms (paper-index 1)
+  finished n=21 k>=20 -> unsat in 8ms (paper-index 4)
+  finished n=22 k>=21 -> unsat in 9ms (paper-index 2)
+  finished n=20 k>=19 -> unsat in 9ms (paper-index 6)
+  finished n=18 k>=17 -> unsat in 5ms (paper-index 12)
+  finished n=24 k>=23 -> unsat in 12ms (paper-index 0)
+  finished n=17 k>=16 -> unsat in 4ms (paper-index 16)
+  finished n=21 k>=19 -> unsat in 15ms (paper-index 7)
+  finished n=22 k>=20 -> unsat in 16ms (paper-index 5)
+  finished n=23 k>=21 -> unsat in 18ms (paper-index 3)
+  finished n=20 k>=18 -> unsat in 18ms (paper-index 10)
+  finished n=19 k>=17 -> unsat in 13ms (paper-index 13)
+  finished n=16 k>=15 -> unsat in 6ms (paper-index 20)
+  finished n=18 k>=16 -> unsat in 11ms (paper-index 17)
+  finished n=15 k>=14 -> unsat in 3ms (paper-index 25)
+  finished n=17 k>=15 -> unsat in 10ms (paper-index 21)
+  finished n=21 k>=18 -> unsat in 31ms (paper-index 11)
+  finished n=16 k>=14 -> unsat in 8ms (paper-index 26)
+  finished n=22 k>=19 -> unsat in 31ms (paper-index 8)
+  finished n=14 k>=13 -> unsat in 3ms (paper-index 30)
+  finished n=15 k>=13 -> unsat in 7ms (paper-index 31)
+  finished n=20 k>=17 -> unsat in 33ms (paper-index 14)
+  finished n=17 k>=14 -> unsat in 17ms (paper-index 27)
+  finished n=19 k>=16 -> unsat in 30ms (paper-index 18)
+  finished n=18 k>=15 -> unsat in 24ms (paper-index 22)
+  finished n=13 k>=12 -> unsat in 3ms (paper-index 36)
+  finished n=16 k>=13 -> unsat in 13ms (paper-index 32)
+  finished n=14 k>=12 -> unsat in 6ms (paper-index 37)
+  finished n=21 k>=17 -> unsat in 46ms (paper-index 15)
+  finished n=20 k>=16 -> unsat in 47ms (paper-index 19)
+  finished n=15 k>=12 -> unsat in 18ms (paper-index 38)
+  finished n=12 k>=11 -> unsat in 3ms (paper-index 42)
+  finished n=13 k>=11 -> unsat in 5ms (paper-index 43)
+  finished n=14 k>=11 -> unsat in 12ms (paper-index 44)
+  finished n=18 k>=14 -> unsat in 62ms (paper-index 28)
+  finished n=17 k>=13 -> unsat in 59ms (paper-index 33)
+  finished n=15 k>=11 -> unsat in 32ms (paper-index 45)
+  finished n=11 k>=10 -> unsat in 2ms (paper-index 49)
+  finished n=16 k>=12 -> unsat in 57ms (paper-index 39)
+  finished n=12 k>=10 -> unsat in 5ms (paper-index 50)
+  finished n=13 k>=10 -> unsat in 12ms (paper-index 51)
+  finished n=19 k>=15 -> unsat in 99ms (paper-index 23)
+  finished n=14 k>=10 -> unsat in 18ms (paper-index 52)
+  finished n=20 k>=15 -> unsat in 191ms (paper-index 24)
+  finished n=10 k>=9 -> unsat in 5ms (paper-index 56)
+  finished n=11 k>=9 -> unsat in 5ms (paper-index 57)
+  finished n=12 k>=9 -> unsat in 10ms (paper-index 58)
+  finished n=17 k>=12 -> unsat in 230ms (paper-index 40)
+  finished n=19 k>=14 -> unsat in 281ms (paper-index 29)
+  finished n=16 k>=11 -> unsat in 258ms (paper-index 46)
+  finished n=18 k>=13 -> unsat in 298ms (paper-index 34)
+  finished n=19 k>=13 -> unsat in 334ms (paper-index 35)
+  finished n=9 k>=8 -> unsat in 2ms (paper-index 64)
+  finished n=10 k>=8 -> unsat in 4ms (paper-index 65)
+  finished n=11 k>=8 -> unsat in 10ms (paper-index 66)
+  finished n=15 k>=10 -> unsat in 276ms (paper-index 53)
+  finished n=13 k>=9 -> unsat in 177ms (paper-index 59)
+  finished n=12 k>=8 -> unsat in 21ms (paper-index 67)
+  finished n=14 k>=9 -> unsat in 231ms (paper-index 60)
+  finished n=13 k>=8 -> unsat in 283ms (paper-index 68)
+  finished n=8 k>=7 -> unsat in 2ms (paper-index 72)
+  finished n=9 k>=7 -> unsat in 4ms (paper-index 73)
+  finished n=10 k>=7 -> unsat in 8ms (paper-index 74)
+  finished n=11 k>=7 -> unsat in 25ms (paper-index 75)
+  finished n=12 k>=7 -> unsat in 290ms (paper-index 76)
+  finished n=18 k>=12 -> unsat in 1.01s (paper-index 41)
+  finished n=16 k>=10 -> unsat in 1.31s (paper-index 54)
+  finished n=15 k>=9 -> unsat in 1.41s (paper-index 61)
+  finished n=18 k>=11 -> unsat in 1.68s (paper-index 48)
+  finished n=7 k>=6 -> unsat in 2ms (paper-index 81)
+  finished n=8 k>=6 -> unsat in 4ms (paper-index 82)
+  finished n=9 k>=6 -> unsat in 9ms (paper-index 83)
+  finished n=10 k>=6 -> unsat in 25ms (paper-index 84)
+  finished n=17 k>=11 -> unsat in 1.79s (paper-index 47)
+  finished n=11 k>=6 -> unsat in 71ms (paper-index 85)
+  finished n=14 k>=8 -> unsat in 1.96s (paper-index 69)
+  finished n=13 k>=7 -> unsat in 1.97s (paper-index 77)
+  finished n=17 k>=10 -> unsat in 4.14s (paper-index 55)
+  finished n=6 k>=5 -> unsat in 5ms (paper-index 90)
+  finished n=7 k>=5 -> unsat in 5ms (paper-index 91)
+  finished n=8 k>=5 -> unsat in 8ms (paper-index 92)
+  finished n=9 k>=5 -> unsat in 24ms (paper-index 93)
+  finished n=10 k>=5 -> unsat in 85ms (paper-index 94)
+  finished n=16 k>=9 -> unsat in 4.15s (paper-index 62)
+  finished n=15 k>=8 -> unsat in 4.63s (paper-index 70)
+  finished n=17 k>=9 -> unsat in 5.03s (paper-index 63)
+  finished n=12 k>=6 -> unsat in 4.04s (paper-index 86)
+  finished n=14 k>=7 -> unsat in 6.90s (paper-index 78)
+  finished n=5 k>=4 -> unsat in 2ms (paper-index 100)
+  finished n=6 k>=4 -> unsat in 3ms (paper-index 101)
+  finished n=7 k>=4 -> unsat in 8ms (paper-index 102)
+  finished n=8 k>=4 -> unsat in 35ms (paper-index 103)
+  finished n=9 k>=4 -> unsat in 91ms (paper-index 104)
+  finished n=11 k>=5 -> unsat in 5.75s (paper-index 95)
+  finished n=10 k>=4 -> unsat in 3.65s (paper-index 105)
+  finished n=13 k>=6 -> unsat in 10.34s (paper-index 87)
+  finished n=16 k>=8 -> unsat in 15.46s (paper-index 71)
+  finished n=16 k>=7 -> unsat in 17.86s (paper-index 80)
+  finished n=4 k>=3 -> unsat in 1ms (paper-index 110)
+  finished n=5 k>=3 -> unsat in 2ms (paper-index 111)
+  finished n=6 k>=3 -> unsat in 8ms (paper-index 112)
+  finished n=7 k>=3 -> unsat in 34ms (paper-index 113)
+  finished n=8 k>=3 -> unsat in 69ms (paper-index 114)
+  finished n=9 k>=3 -> unsat in 3.00s (paper-index 115)
+  finished n=15 k>=7 -> unsat in 25.16s (paper-index 79)
+  finished n=12 k>=5 -> unsat in 22.77s (paper-index 96)
+  finished n=14 k>=6 -> unsat in 55.96s (paper-index 88)
+  finished n=11 k>=4 -> unsat in 1m1.5s (paper-index 106)
+  finished n=10 k>=3 -> unsat in 1m5.3s (paper-index 116)
+  finished n=3 k>=2 -> unsat in 2ms (paper-index 121)
+  finished n=4 k>=2 -> unsat in 3ms (paper-index 122)
+  finished n=5 k>=2 -> unsat in 5ms (paper-index 123)
+  finished n=6 k>=2 -> unsat in 30ms (paper-index 124)
+  finished n=7 k>=2 -> unsat in 79ms (paper-index 125)
+  finished n=8 k>=2 -> unsat in 2.37s (paper-index 126)
+  finished n=13 k>=5 -> unsat in 1m57.7s (paper-index 97)
+  finished n=14 k>=5 -> unsat in 2m16.3s (paper-index 98)
+  finished n=15 k>=6 -> unsat in 2m23.2s (paper-index 89)
+  finished n=9 k>=2 -> unsat in 56.17s (paper-index 127)
+  finished n=15 k>=5 -> timeout in 3m0.0s (paper-index 99)
+  finished n=2 k>=1 -> unsat in 1ms (paper-index 132)
+  finished n=3 k>=1 -> unsat in 2ms (paper-index 133)
+  finished n=4 k>=1 -> unsat in 11ms (paper-index 134)
+  finished n=5 k>=1 -> unsat in 17ms (paper-index 135)
+  finished n=6 k>=1 -> unsat in 46ms (paper-index 136)
+  finished n=12 k>=4 -> timeout in 3m0.0s (paper-index 107)
+  finished n=13 k>=4 -> timeout in 3m0.0s (paper-index 108)
+  finished n=14 k>=4 -> timeout in 3m0.0s (paper-index 109)
+  finished n=11 k>=3 -> timeout in 3m0.0s (paper-index 117)
+  finished n=12 k>=3 -> timeout in 3m0.0s (paper-index 118)
+  finished n=13 k>=3 -> timeout in 3m0.0s (paper-index 119)
+  finished n=8 k>=1 -> unsat in 54.08s (paper-index 138)
+  finished n=14 k>=3 -> timeout in 3m0.0s (paper-index 120)
+  finished n=13 k>=1 -> sat in 13.37s (paper-index 143)
+  finished n=7 k>=1 -> unsat in 1m52.8s (paper-index 137)
+  finished n=10 k>=2 -> timeout in 3m0.0s (paper-index 128)
+  finished n=11 k>=2 -> timeout in 3m0.0s (paper-index 129)
+  finished n=12 k>=2 -> timeout in 3m0.0s (paper-index 130)
+  finished n=13 k>=2 -> timeout in 3m0.0s (paper-index 131)
+  finished n=9 k>=1 -> timeout in 3m0.0s (paper-index 139)
+  finished n=10 k>=1 -> timeout in 3m0.0s (paper-index 140)
+  finished n=11 k>=1 -> timeout in 3m0.0s (paper-index 141)
+  finished n=12 k>=1 -> timeout in 3m0.0s (paper-index 142)
+accepted paper-order SAT at n=13 k>=1; cancelled larger indices
+warning: 16 earlier candidate(s) timed out; paper-order may be suboptimal
+solver=cadical mode=search k_min=1 jobs=12 attempts=144 distinct_ancilla=true css=true fpa=0
+  tried n=24 k>=23 -> unsat
+  tried n=23 k>=22 -> unsat
+  tried n=22 k>=21 -> unsat
+  tried n=23 k>=21 -> unsat
+  tried n=21 k>=20 -> unsat
+  tried n=22 k>=20 -> unsat
+  tried n=20 k>=19 -> unsat
+  tried n=21 k>=19 -> unsat
+  tried n=22 k>=19 -> unsat
+  tried n=19 k>=18 -> unsat
+  tried n=20 k>=18 -> unsat
+  tried n=21 k>=18 -> unsat
+  tried n=18 k>=17 -> unsat
+  tried n=19 k>=17 -> unsat
+  tried n=20 k>=17 -> unsat
+  tried n=21 k>=17 -> unsat
+  tried n=17 k>=16 -> unsat
+  tried n=18 k>=16 -> unsat
+  tried n=19 k>=16 -> unsat
+  tried n=20 k>=16 -> unsat
+  tried n=16 k>=15 -> unsat
+  tried n=17 k>=15 -> unsat
+  tried n=18 k>=15 -> unsat
+  tried n=19 k>=15 -> unsat
+  tried n=20 k>=15 -> unsat
+  tried n=15 k>=14 -> unsat
+  tried n=16 k>=14 -> unsat
+  tried n=17 k>=14 -> unsat
+  tried n=18 k>=14 -> unsat
+  tried n=19 k>=14 -> unsat
+  tried n=14 k>=13 -> unsat
+  tried n=15 k>=13 -> unsat
+  tried n=16 k>=13 -> unsat
+  tried n=17 k>=13 -> unsat
+  tried n=18 k>=13 -> unsat
+  tried n=19 k>=13 -> unsat
+  tried n=13 k>=12 -> unsat
+  tried n=14 k>=12 -> unsat
+  tried n=15 k>=12 -> unsat
+  tried n=16 k>=12 -> unsat
+  tried n=17 k>=12 -> unsat
+  tried n=18 k>=12 -> unsat
+  tried n=12 k>=11 -> unsat
+  tried n=13 k>=11 -> unsat
+  tried n=14 k>=11 -> unsat
+  tried n=15 k>=11 -> unsat
+  tried n=16 k>=11 -> unsat
+  tried n=17 k>=11 -> unsat
+  tried n=18 k>=11 -> unsat
+  tried n=11 k>=10 -> unsat
+  tried n=12 k>=10 -> unsat
+  tried n=13 k>=10 -> unsat
+  tried n=14 k>=10 -> unsat
+  tried n=15 k>=10 -> unsat
+  tried n=16 k>=10 -> unsat
+  tried n=17 k>=10 -> unsat
+  tried n=10 k>=9 -> unsat
+  tried n=11 k>=9 -> unsat
+  tried n=12 k>=9 -> unsat
+  tried n=13 k>=9 -> unsat
+  tried n=14 k>=9 -> unsat
+  tried n=15 k>=9 -> unsat
+  tried n=16 k>=9 -> unsat
+  tried n=17 k>=9 -> unsat
+  tried n=9 k>=8 -> unsat
+  tried n=10 k>=8 -> unsat
+  tried n=11 k>=8 -> unsat
+  tried n=12 k>=8 -> unsat
+  tried n=13 k>=8 -> unsat
+  tried n=14 k>=8 -> unsat
+  tried n=15 k>=8 -> unsat
+  tried n=16 k>=8 -> unsat
+  tried n=8 k>=7 -> unsat
+  tried n=9 k>=7 -> unsat
+  tried n=10 k>=7 -> unsat
+  tried n=11 k>=7 -> unsat
+  tried n=12 k>=7 -> unsat
+  tried n=13 k>=7 -> unsat
+  tried n=14 k>=7 -> unsat
+  tried n=15 k>=7 -> unsat
+  tried n=16 k>=7 -> unsat
+  tried n=7 k>=6 -> unsat
+  tried n=8 k>=6 -> unsat
+  tried n=9 k>=6 -> unsat
+  tried n=10 k>=6 -> unsat
+  tried n=11 k>=6 -> unsat
+  tried n=12 k>=6 -> unsat
+  tried n=13 k>=6 -> unsat
+  tried n=14 k>=6 -> unsat
+  tried n=15 k>=6 -> unsat
+  tried n=6 k>=5 -> unsat
+  tried n=7 k>=5 -> unsat
+  tried n=8 k>=5 -> unsat
+  tried n=9 k>=5 -> unsat
+  tried n=10 k>=5 -> unsat
+  tried n=11 k>=5 -> unsat
+  tried n=12 k>=5 -> unsat
+  tried n=13 k>=5 -> unsat
+  tried n=14 k>=5 -> unsat
+  tried n=15 k>=5 -> timeout
+  tried n=5 k>=4 -> unsat
+  tried n=6 k>=4 -> unsat
+  tried n=7 k>=4 -> unsat
+  tried n=8 k>=4 -> unsat
+  tried n=9 k>=4 -> unsat
+  tried n=10 k>=4 -> unsat
+  tried n=11 k>=4 -> unsat
+  tried n=12 k>=4 -> timeout
+  tried n=13 k>=4 -> timeout
+  tried n=14 k>=4 -> timeout
+  tried n=4 k>=3 -> unsat
+  tried n=5 k>=3 -> unsat
+  tried n=6 k>=3 -> unsat
+  tried n=7 k>=3 -> unsat
+  tried n=8 k>=3 -> unsat
+  tried n=9 k>=3 -> unsat
+  tried n=10 k>=3 -> unsat
+  tried n=11 k>=3 -> timeout
+  tried n=12 k>=3 -> timeout
+  tried n=13 k>=3 -> timeout
+  tried n=14 k>=3 -> timeout
+  tried n=3 k>=2 -> unsat
+  tried n=4 k>=2 -> unsat
+  tried n=5 k>=2 -> unsat
+  tried n=6 k>=2 -> unsat
+  tried n=7 k>=2 -> unsat
+  tried n=8 k>=2 -> unsat
+  tried n=9 k>=2 -> unsat
+  tried n=10 k>=2 -> timeout
+  tried n=11 k>=2 -> timeout
+  tried n=12 k>=2 -> timeout
+  tried n=13 k>=2 -> timeout
+  tried n=2 k>=1 -> unsat
+  tried n=3 k>=1 -> unsat
+  tried n=4 k>=1 -> unsat
+  tried n=5 k>=1 -> unsat
+  tried n=6 k>=1 -> unsat
+  tried n=7 k>=1 -> unsat
+  tried n=8 k>=1 -> unsat
+  tried n=9 k>=1 -> timeout
+  tried n=10 k>=1 -> timeout
+  tried n=11 k>=1 -> timeout
+  tried n=12 k>=1 -> timeout
+  tried n=13 k>=1 -> sat
+CodeLayout n=13 m=12 rank=12 k=1 k_lb=1 |V|=25
+data vertices (indices): [1, 3, 5, 6, 8, 9, 12, 15, 16, 18, 19, 21, 23]
+qubit -> vertex:  q0->v1  q1->v3  q2->v5  q3->v6  q4->v8  q5->v9  q6->v12  q7->v15  q8->v16  q9->v18  q10->v19  q11->v21  q12->v23
+S0(X) ancilla=v22  X(q8) X(q11) X(q12)
+S1(X) ancilla=v11  X(q3) X(q6) X(q7) X(q8)
+S2(X) ancilla=v13  X(q4) X(q5) X(q6) X(q9)
+S3(Z) ancilla=v20  Z(q7) Z(q8) Z(q11)
+S4(Z) ancilla=v17  Z(q6) Z(q8) Z(q9) Z(q12)
+S5(Z) ancilla=v4  Z(q1) Z(q4) Z(q5)
+S6(Z) ancilla=v10  Z(q2) Z(q3) Z(q7)
+S7(X) ancilla=v0  X(q0) X(q2) X(q3)
+S8(Z) ancilla=v14  Z(q5) Z(q9) Z(q10)
+S9(Z) ancilla=v7  Z(q0) Z(q3) Z(q4) Z(q6)
+S10(X) ancilla=v24  X(q9) X(q10) X(q12)
+S11(X) ancilla=v2  X(q0) X(q1) X(q4)
+wrote case JSON: /Users/yfc/fromGit/EasyQECC/docs/demo/cases/grid-5x5-diag-search-k1-css-distinct.json
+wrote PNG: /Users/yfc/fromGit/EasyQECC/docs/demo/media/grid-5x5-diag-search-k1-css-distinct.png
+activated AMO diagonals: (none)

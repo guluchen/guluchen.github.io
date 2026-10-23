@@ -1,0 +1,15 @@
+solver=cadical mode=place n=9 m=8 |V|=25 distinct_ancilla=true css=false fpa=0
+CodeLayout n=9 m=8 rank=8 k=1 k_lb=1 |V|=25
+data vertices (indices): [2, 6, 8, 10, 12, 14, 16, 18, 22]
+qubit -> vertex:  q0->v10  q1->v6  q2->v2  q3->v16  q4->v12  q5->v8  q6->v22  q7->v18  q8->v14
+S0(Z) ancilla=v11  Z(q0) Z(q1) Z(q3) Z(q4)
+S1(Z) ancilla=v3  Z(q2) Z(q5)
+S2(Z) ancilla=v21  Z(q3) Z(q6)
+S3(Z) ancilla=v13  Z(q4) Z(q5) Z(q7) Z(q8)
+S4(X) ancilla=v5  X(q0) X(q1)
+S5(X) ancilla=v7  X(q1) X(q2) X(q4) X(q5)
+S6(X) ancilla=v17  X(q3) X(q4) X(q6) X(q7)
+S7(X) ancilla=v19  X(q7) X(q8)
+wrote case JSON: docs/demo/cases/grid-5x5-place-surface-9-1-3.json
+wrote PNG: docs/demo/media/grid-5x5-place-surface-9-1-3.png
+activated AMO diagonals: (none)

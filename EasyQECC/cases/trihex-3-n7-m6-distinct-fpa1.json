@@ -1,0 +1,17 @@
+{
+  "id": "trihex-3-n7-m6-distinct-fpa1",
+  "graph": "trihex-3",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "n": 7,
+    "m": 6,
+    "distinct_ancilla": true,
+    "flags_per_ancilla": 1,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

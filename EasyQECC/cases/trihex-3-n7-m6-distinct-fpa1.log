@@ -1,0 +1,1 @@
+error: need |V| >= 19 for n=7 m=6 distinct_ancilla=true flags_per_ancilla=1 (got |V|=16)

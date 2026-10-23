@@ -1,0 +1,13 @@
+solver=cadical mode=fixed n=7 m=6 k_lb=1 distinct_ancilla=true css=false fpa=0
+CodeLayout n=7 m=6 rank=6 k=1 k_lb=1 |V|=25
+data vertices (indices): [2, 7, 10, 12, 14, 17, 22]
+qubit -> vertex:  q1->v2  q2->v7  q3->v10  q4->v12  q5->v14  q6->v17  q7->v22
+S1 ancilla=v6  Z(q1) Z(q2) X(q3) Z(q4)
+S2 ancilla=v11  Z(q2) Z(q3) X(q4) Y(q6)
+S3 ancilla=v13  X(q2) X(q4) Z(q5) X(q6)
+S4 ancilla=v16  Y(q3) X(q4) X(q6) X(q7)
+S5 ancilla=v8  X(q1) Z(q2) X(q4) X(q5)
+S6 ancilla=v18  Z(q4) Y(q5) X(q6) Z(q7)
+wrote case JSON: docs/demo/cases/grid-5x5-diag-fixed-n7-k1.json
+wrote PNG: docs/demo/media/grid-5x5-diag-fixed-n7-k1.png
+activated AMO diagonals: (none)

@@ -1,0 +1,2 @@
+2026-10-11 11:58:14 exit=1
+error: need |V| >= 19 for n=7 m=6 distinct_ancilla=true flags_per_ancilla=1 (got |V|=16)

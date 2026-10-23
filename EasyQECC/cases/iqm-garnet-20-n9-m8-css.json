@@ -1,0 +1,16 @@
+{
+  "id": "iqm-garnet-20-n9-m8-css",
+  "graph": "iqm-garnet-20",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "n": 9,
+    "m": 8,
+    "css": true,
+    "timeout": 600
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

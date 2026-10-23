@@ -1,0 +1,15 @@
+{
+  "id": "trihex-6-search-k1-distinct",
+  "graph": "trihex-6",
+  "status": "timeout",
+  "message": "Not found within the resource limit",
+  "params": {
+    "k_min": 1,
+    "distinct_ancilla": true,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

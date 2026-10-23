@@ -1,0 +1,11 @@
+solver=cadical mode=place n=5 m=4 |V|=25 distinct_ancilla=false css=false fpa=0
+CodeLayout n=5 m=4 rank=4 k=1 k_lb=1 |V|=25
+data vertices (indices): [17, 19, 22, 23, 24]
+qubit -> vertex:  q0->v24  q1->v23  q2->v22  q3->v19  q4->v17
+S0 ancilla=v18  X(q0) Z(q1) Z(q2) X(q3)
+S1 ancilla=v18  X(q1) Z(q2) Z(q3) X(q4)
+S2 ancilla=v18  X(q0) X(q2) Z(q3) Z(q4)
+S3 ancilla=v18  Z(q0) X(q1) X(q3) Z(q4)
+wrote case JSON: /Users/yfc/fromGit/EasyQECC/docs/demo/cases/grid-5x5-diag-place-five-qubit.json
+wrote PNG: /Users/yfc/fromGit/EasyQECC/docs/demo/media/grid-5x5-diag-place-five-qubit.png
+activated AMO diagonals: (none)

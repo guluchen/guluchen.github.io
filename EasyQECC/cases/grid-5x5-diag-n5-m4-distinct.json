@@ -1,0 +1,16 @@
+{
+  "id": "grid-5x5-diag-n5-m4-distinct",
+  "graph": "grid-5x5-diag",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "n": 5,
+    "m": 4,
+    "distinct_ancilla": true,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

@@ -1,0 +1,15 @@
+{
+  "id": "trihex-3-search-k1-distinct",
+  "graph": "trihex-3",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "k_min": 1,
+    "distinct_ancilla": true,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

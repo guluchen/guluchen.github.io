@@ -1,0 +1,17 @@
+{
+  "id": "grid-6x6-n9-m8-css-distinct",
+  "graph": "grid-6x6",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "n": 9,
+    "m": 8,
+    "css": true,
+    "distinct_ancilla": true,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

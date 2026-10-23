@@ -1,0 +1,14 @@
+{
+  "id": "grid-6x6-diag-place-steane",
+  "graph": "grid-6x6-diag",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "distinct_ancilla": true,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

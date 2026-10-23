@@ -1,0 +1,58 @@
+{
+  "presets": [
+    {
+      "group": "vendor",
+      "id": "iqm-garnet-20",
+      "label": "IQM Garnet 20",
+      "n_qubits": 20
+    },
+    {
+      "group": "vendor",
+      "id": "iqm-aphrodite-54",
+      "label": "IQM Aphrodite 54",
+      "n_qubits": 54
+    },
+    {
+      "group": "vendor",
+      "id": "google-sycamore-54",
+      "label": "Google Sycamore 54",
+      "n_qubits": 54
+    },
+    {
+      "group": "local",
+      "id": "grid-5x5",
+      "label": "Grid 5×5",
+      "n_qubits": 25
+    },
+    {
+      "group": "local",
+      "id": "grid-5x5-diag",
+      "label": "Grid 5×5 + diagonals",
+      "n_qubits": 25
+    },
+    {
+      "group": "local",
+      "id": "grid-6x6",
+      "label": "Grid 6×6",
+      "n_qubits": 36
+    },
+    {
+      "group": "local",
+      "id": "grid-6x6-diag",
+      "label": "Grid 6×6 + diagonals",
+      "n_qubits": 36
+    },
+    {
+      "group": "local",
+      "id": "trihex-3",
+      "label": "Trihex 3",
+      "n_qubits": 16
+    },
+    {
+      "group": "local",
+      "id": "trihex-6",
+      "label": "Trihex 6",
+      "n_qubits": 28
+    }
+  ]
+}

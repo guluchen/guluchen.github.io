@@ -1,0 +1,16 @@
+{
+  "id": "grid-5x5-diag-fixed-n5-k1-distinct",
+  "graph": "grid-5x5-diag",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "mode": "fixed",
+    "n": 5,
+    "m": 4,
+    "k": 1,
+    "distinct_ancilla": true,
+    "flags_per_ancilla": 0
+  },
+  "layout": null,
+  "png": null
+}

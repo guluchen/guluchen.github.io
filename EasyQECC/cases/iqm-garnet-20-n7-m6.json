@@ -1,0 +1,15 @@
+{
+  "id": "iqm-garnet-20-n7-m6",
+  "graph": "iqm-garnet-20",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "n": 7,
+    "m": 6,
+    "timeout": 600
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

@@ -1,0 +1,16 @@
+{
+  "id": "grid-6x6-search-k1-distinct-fpa1",
+  "graph": "grid-6x6",
+  "status": "timeout",
+  "message": "Not found within the resource limit",
+  "params": {
+    "k_min": 1,
+    "distinct_ancilla": true,
+    "flags_per_ancilla": 1,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}

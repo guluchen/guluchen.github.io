@@ -1,0 +1,5 @@
+cadical-wasm (https://github.com/dgreensp/cadical-wasm)
+Vendored from npm package cadical-wasm for the EasyQECC browser demo.
+
+CaDiCaL is Armin Biere's SAT solver; this package compiles it to WebAssembly
+via Emscripten. See the upstream repository for license terms.

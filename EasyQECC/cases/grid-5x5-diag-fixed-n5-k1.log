@@ -1,0 +1,11 @@
+solver=cadical mode=fixed n=5 m=4 k_lb=1 distinct_ancilla=false css=false fpa=0
+CodeLayout n=5 m=4 rank=4 k=1 k_lb=1 |V|=25
+data vertices (indices): [0, 1, 2, 5, 7]
+qubit -> vertex:  q1->v0  q2->v1  q3->v2  q4->v5  q5->v7
+S1 ancilla=v6  X(q1) Y(q2) Z(q4) Y(q5)
+S2 ancilla=v6  X(q1) X(q2) Y(q3) X(q4)
+S3 ancilla=v6  Y(q1) Y(q2) Y(q3) X(q5)
+S4 ancilla=v6  X(q1) Z(q3) Y(q4) X(q5)
+wrote case JSON: docs/demo/cases/grid-5x5-diag-fixed-n5-k1.json
+wrote PNG: docs/demo/media/grid-5x5-diag-fixed-n5-k1.png
+activated AMO diagonals: (none)

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EasyQECC — hardware-compatible code layout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1 class="brand">EasyQECC</h1>
+    <p class="tagline">Find a quantum error-correcting code that fits a real chip’s connectivity.</p>
+    <div class="mode-row">
+      <div class="mode-switch" role="group" aria-label="Demo mode">
+        <button type="button" id="modeLive" class="active">Live</button>
+        <button type="button" id="modeStatic">Static</button>
+      </div>
+      <span class="mode-hint" id="modeHint">Detecting backend…</span>
+      <span id="runBadge" class="run-badge hidden">
+        Live search running
+        <button type="button" id="cancelBadgeBtn">Cancel</button>
+      </span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel" id="controls">
+      <h2>Hardware</h2>
+      <div id="controlsBody">
+        <label for="presetSelect" id="selectLabel">Chip / graph</label>
+        <select id="presetSelect"></select>
+        <select id="caseSelect" class="hidden" aria-label="Saved case"></select>
+        <p class="mode-hint hidden" id="staticCaseHint">Only saved runs are selectable; other settings are read-only.</p>
+
+        <div id="customGraphWrap" class="hidden">
+          <label for="customEl">Connectivity (edge list)</label>
+          <textarea id="customEl" rows="10" spellcheck="false" placeholder="# name: my-chip
+# optional layout: # xy id x y
+# then one undirected coupler per line:
+0 1
+1 2
+2 0"></textarea>
+          <p class="mode-hint">Same format as <code>.el</code> files. Optional <code># xy id x y</code> for layout; otherwise a circle is used.</p>
+          <button type="button" class="cancel" id="previewCustomBtn">Preview graph</button>
+        </div>
+
+        <label for="runMode">Task</label>
+        <select id="runMode">
+          <option value="search-min-n" selected>Search k=1, smallest n</option>
+          <option value="search">Search largest k first</option>
+          <option value="fixed">Fixed size (n, k)</option>
+          <option value="place">Place known code</option>
+        </select>
+
+        <div id="searchParams" class="hidden">
+          <label for="kMin">Minimum logical qubits k</label>
+          <input id="kMin" type="number" min="1" value="1" />
+          <p class="mode-hint">Tried from large k down to this value.</p>
+        </div>
+        <p class="mode-hint" id="searchMinNHint">Tries [[n,1,d≥3]] with n = 2, 3, … until a layout fits.</p>
+        <div id="fixedParams" class="hidden">
+          <label for="nFixed">Data qubits n</label>
+          <input id="nFixed" type="number" min="2" value="7" />
+          <label for="kFixed">Logical qubits k</label>
+          <input id="kFixed" type="number" min="1" value="1" />
+        </div>
+        <div id="placeParams" class="hidden">
+          <label for="placeCode">Code to place</label>
+          <select id="placeCode">
+            <option value="examples/matrices/five-qubit.pcm">Five-qubit [[5,1,3]]</option>
+            <option value="examples/matrices/surface-9-1-3.pcm">Surface [[9,1,3]]</option>
+            <option value="examples/matrices/steane-7-1-3.pcm">Steane [[7,1,3]]</option>
+          </select>
+          <p class="mode-hint">Places a fixed stabilizer matrix onto the selected chip.</p>
+        </div>
+
+        <div class="checks">
+          <label><input type="checkbox" id="css" /> CSS stabilizers</label>
+          <label><input type="checkbox" id="distinct" checked /> Distinct ancillas</label>
+          <label id="saveCaseLabel"><input type="checkbox" id="saveCase" /> Save result into Static cases</label>
+        </div>
+
+        <div id="distanceParams">
+          <label for="distanceMode">Distance check</label>
+          <select id="distanceMode">
+            <option value="cegar" selected>d ≥ 3 (lazy)</option>
+            <option value="exact">d ≥ 3 (eager)</option>
+            <option value="strict">Strict (forbid wt≤2 stabilizers)</option>
+          </select>
+          <p class="mode-hint">Lazy/eager are true d≥3. Strict is stronger and excludes codes like surface [[9,1,3]]. Place ignores this.</p>
+        </div>
+
+        <label for="fpa">Flags per ancilla</label>
+        <input id="fpa" type="number" min="0" step="1" value="1" />
+        <p class="mode-hint">0 = no exclusive flags. Default 1.</p>
+
+        <label for="timeout">Time limit (seconds per size)</label>
+        <input id="timeout" type="number" min="5" value="90" />
+
+        <div class="actions" id="liveActions">
+          <button type="button" class="run" id="runBtn">Run</button>
+          <button type="button" class="cancel" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage">
+      <div class="stage-head" id="stageHead">Select a chip to begin</div>
+      <canvas id="graphCanvas" width="900" height="640"></canvas>
+    </section>
+
+    <aside class="panel">
+      <h2>Progress</h2>
+      <div class="log" id="log"></div>
+      <div id="pcmWrap" class="pcm-wrap hidden">
+        <h2>Parity checks</h2>
+        <p class="mode-hint" id="pcmHint">Qubits & stabilizers indexed 1…n / 1…m</p>
+        <pre class="pcm" id="pcm"></pre>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

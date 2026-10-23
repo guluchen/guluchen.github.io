@@ -1,0 +1,14 @@
+{
+  "id": "grid-5x5-diag-place-steane-distinct",
+  "graph": "grid-5x5-diag",
+  "status": "none",
+  "message": "No compatible layout exists for these parameters",
+  "params": {
+    "distinct_ancilla": true,
+    "timeout": 180
+  },
+  "layout": null,
+  "png": null,
+  "detail": null,
+  "exit_code": 1
+}
