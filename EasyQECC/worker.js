@@ -88,6 +88,8 @@ function wireBridge() {
     },
     () => {
       deadlineMs = null;
+      // Do not clear timedOut here: Rust may still ask was_timed_out() after
+      // the interrupting solve returns.
     },
     () => timedOut
   );

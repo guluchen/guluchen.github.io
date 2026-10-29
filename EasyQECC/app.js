@@ -23,6 +23,8 @@ const state = {
   backend: null,
   worker: null,
   workerReady: null,
+  /** Bumped to ignore stale worker message listeners (Cancel / re-Run). */
+  wasmRunId: 0,
   /** Cached .el text for WASM Live (keyed by preset id). */
   graphEl: {},
   presets: [],
@@ -977,12 +979,16 @@ function draw() {
 async function runLiveWasm(body) {
   const w = ensureWorker();
   await workerReady();
+  // Invalidate any prior listeners left behind by Cancel / a stuck solve.
+  state.wasmRunId += 1;
+  const runId = state.wasmRunId;
   state.jobId = "wasm";
   state.jobCursor = 0;
   updateRunBadge();
   saveLiveSession();
   await new Promise((resolve, reject) => {
     const onMsg = (ev) => {
+      if (runId !== state.wasmRunId) return;
       const msg = ev.data || {};
       if (msg.type === "event" && msg.event) {
         handleEvent(msg.event);
@@ -990,12 +996,14 @@ async function runLiveWasm(body) {
       }
       if (msg.type === "solveDone") {
         w.removeEventListener("message", onMsg);
-        resolve();
+        if (runId === state.wasmRunId) resolve();
         return;
       }
       if (msg.type === "error") {
         w.removeEventListener("message", onMsg);
-        reject(new Error(msg.message || "wasm solve failed"));
+        if (runId === state.wasmRunId) {
+          reject(new Error(msg.message || "wasm solve failed"));
+        }
       }
     };
     w.addEventListener("message", onMsg);
@@ -1189,6 +1197,8 @@ async function cancelJob() {
   liveLog("Cancelling…", "info");
   if (state.backend === "wasm" || id === "wasm") {
     try {
+      // Drop stale worker listeners so Progress lines are not duplicated.
+      state.wasmRunId += 1;
       ensureWorker().postMessage({ type: "cancel" });
     } catch (e) {
       liveLog(String(e.message || e), "bad");
