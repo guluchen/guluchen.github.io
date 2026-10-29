@@ -15,11 +15,15 @@ let cancelled = false;
 let deadlineMs = null;
 let timedOut = false;
 
+function pastDeadline() {
+  return deadlineMs != null && performance.now() >= deadlineMs;
+}
+
 function ensureTerminate() {
   if (!solver) return;
   solver.setTerminate(() => {
     if (cancelled) return true;
-    if (deadlineMs != null && performance.now() >= deadlineMs) {
+    if (pastDeadline()) {
       timedOut = true;
       return true;
     }
@@ -52,13 +56,29 @@ function wireBridge() {
       solver.addClause(arr);
     },
     (assumps) => {
+      if (cancelled) return "unknown";
+      if (pastDeadline()) {
+        timedOut = true;
+        try {
+          solver.terminate();
+        } catch (_) {
+          /* ignore */
+        }
+        return "unknown";
+      }
       const opts = {};
       if (assumps && assumps.length) {
         const a = [];
         for (let i = 0; i < assumps.length; i++) a.push(assumps[i]);
         opts.assumptions = a;
       }
-      return solver.solve(opts);
+      const status = solver.solve(opts);
+      // If CaDiCaL returned unknown after the wall deadline, mark timeout even
+      // when the terminate callback was late to fire.
+      if (status === "unknown" && (cancelled || pastDeadline() || timedOut)) {
+        if (!cancelled && (pastDeadline() || timedOut)) timedOut = true;
+      }
+      return status;
     },
     (lit) => solver.value(lit),
     (ms) => {
