@@ -369,7 +369,14 @@ function setStaticChrome(on) {
   ];
   for (const id of lockIds) {
     const node = el(id);
-    if (node) node.disabled = on;
+    if (!node) continue;
+    // Leaving Static must not re-enable Run while a Live job is still running
+    // (or stuck); that was making Run clickable again after Static ↔ Live.
+    if (!on && id === "runBtn" && state.jobId) {
+      node.disabled = true;
+      continue;
+    }
+    node.disabled = on;
   }
   el("caseSelect").disabled = false;
   if (!on) syncCustomGraphUi();
@@ -383,9 +390,26 @@ function caseOptionLabel(c) {
   return `${c.id}  ·  no compatible layout`;
 }
 
+/** Prefer current Live chip + a successful run when opening Static. */
+function pickDefaultStaticCaseId() {
+  if (state.staticCaseId && state.cases.some((c) => c.id === state.staticCaseId)) {
+    return state.staticCaseId;
+  }
+  const chip =
+    state.liveFormSnapshot?.presetId ||
+    state.live?.presetId ||
+    el("presetSelect")?.value ||
+    "";
+  const forChip = chip ? state.cases.filter((c) => c.graph === chip) : [];
+  const pool = forChip.length ? forChip : state.cases;
+  const found = pool.find((c) => (c.status || "found") === "found");
+  if (found) return found.id;
+  return pool[0]?.id || "";
+}
+
 function fillCaseSelect() {
   const sel = el("caseSelect");
-  const prev = state.staticCaseId || sel.value;
+  const prev = pickDefaultStaticCaseId() || sel.value;
   sel.innerHTML = "";
   if (!state.cases.length) {
     const o = document.createElement("option");
