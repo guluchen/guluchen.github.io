@@ -422,8 +422,9 @@ function applyCaseParamsToForm(doc) {
     if (matrix && [...el("placeCode").options].some((o) => o.value === matrix)) {
       el("placeCode").value = matrix;
     }
-  } else if (p.mode === "search-min-n" || (p.search_order === "min-n")) {
-    el("runMode").value = "search-min-n";
+  } else if (p.mode === "search-min-n" || p.search_order === "min-n") {
+    const k = Number(p.k_min) || 1;
+    el("runMode").value = k === 2 ? "search-min-n-k2" : "search-min-n";
   } else if (p.k_min != null && p.n == null) {
     el("runMode").value = "search";
     el("kMin").value = String(p.k_min);
@@ -496,8 +497,14 @@ function setMode(mode) {
 
 function syncTaskParams() {
   const mode = el("runMode").value;
+  const minN = mode === "search-min-n" || mode === "search-min-n-k2";
   el("searchParams").classList.toggle("hidden", mode !== "search");
-  el("searchMinNHint").classList.toggle("hidden", mode !== "search-min-n");
+  el("searchMinNHint").classList.toggle("hidden", !minN);
+  if (minN) {
+    const k = mode === "search-min-n-k2" ? 2 : 1;
+    el("searchMinNHint").textContent =
+      `Tries [[n,${k},d≥3]] with n = ${k + 1}, ${k + 2}, … until a layout fits.`;
+  }
   el("fixedParams").classList.toggle("hidden", mode !== "fixed");
   el("placeParams").classList.toggle("hidden", mode !== "place");
   el("distanceParams").classList.toggle("hidden", mode === "place");
@@ -1039,7 +1046,12 @@ async function runLive() {
     body.el = text;
   }
   if (body.mode === "search") body.k_min = Number(el("kMin").value) || 1;
-  if (body.mode === "search-min-n") body.k_min = 1;
+  if (body.mode === "search-min-n") {
+    body.k_min = 1;
+  } else if (body.mode === "search-min-n-k2") {
+    body.mode = "search-min-n";
+    body.k_min = 2;
+  }
   if (body.mode === "fixed") {
     body.n = Number(el("nFixed").value);
     body.k = Number(el("kFixed").value);
@@ -1066,7 +1078,11 @@ async function runLive() {
         }
       }
       const nq = state.graph && state.graph.n_vertices;
-      if (nq && nq >= 50 && (body.mode === "search" || body.mode === "search-min-n")) {
+      if (
+        nq &&
+        nq >= 50 &&
+        (body.mode === "search" || body.mode === "search-min-n")
+      ) {
         liveLog(
           `Warning: ${nq}-qubit search in-browser can be slow; Static cases may be faster.`,
           "info"
