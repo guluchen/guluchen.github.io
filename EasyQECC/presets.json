@@ -14,6 +14,12 @@
     },
     {
       "group": "vendor",
+      "id": "ibm-heavyhex-27",
+      "label": "IBM Heavy-hex 27",
+      "n_qubits": 27
+    },
+    {
+      "group": "vendor",
       "id": "google-sycamore-54",
       "label": "Google Sycamore 54",
       "n_qubits": 54
