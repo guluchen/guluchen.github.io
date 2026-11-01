@@ -14,15 +14,63 @@
     },
     {
       "group": "vendor",
+      "id": "iqm-apollo-20",
+      "label": "IQM Apollo 20",
+      "n_qubits": 20
+    },
+    {
+      "group": "vendor",
+      "id": "iqm-deneb-7",
+      "label": "IQM Deneb 7",
+      "n_qubits": 7
+    },
+    {
+      "group": "vendor",
+      "id": "iqm-adonis-5",
+      "label": "IQM Adonis 5",
+      "n_qubits": 5
+    },
+    {
+      "group": "vendor",
       "id": "ibm-heavyhex-27",
       "label": "IBM Heavy-hex 27",
       "n_qubits": 27
     },
     {
       "group": "vendor",
+      "id": "ibm-guadalupe-16",
+      "label": "IBM Guadalupe 16",
+      "n_qubits": 16
+    },
+    {
+      "group": "vendor",
+      "id": "ibm-nairobi-7",
+      "label": "IBM Nairobi 7",
+      "n_qubits": 7
+    },
+    {
+      "group": "vendor",
+      "id": "ibm-manila-5",
+      "label": "IBM Manila 5",
+      "n_qubits": 5
+    },
+    {
+      "group": "vendor",
       "id": "google-sycamore-54",
       "label": "Google Sycamore 54",
       "n_qubits": 54
+    },
+    {
+      "group": "vendor",
+      "id": "google-sycamore-23",
+      "label": "Google Sycamore 23",
+      "n_qubits": 23
+    },
+    {
+      "group": "vendor",
+      "id": "rigetti-aspen-9",
+      "label": "Rigetti Aspen-9",
+      "n_qubits": 31
     },
     {
       "group": "local",
