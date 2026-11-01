@@ -15,11 +15,83 @@ const COLORS = {
   text: "#e8eef2",
 };
 
-const SESSION_KEY = "easyqecc-demo-live-v3";
+const SESSION_KEY = "easyqecc-demo-live-v4";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102e";
+const ASSET_V = "20261102f";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
+/** Default custom edge list (same as examples/graphs/grid-5x5.el). */
+const DEFAULT_CUSTOM_EL = `# name: grid-5x5
+# 5x5 grid 4-neighbor (row-major 0..24)
+#
+# xy 0 0.0 0.0
+# xy 1 1.0 0.0
+# xy 2 2.0 0.0
+# xy 3 3.0 0.0
+# xy 4 4.0 0.0
+# xy 5 0.0 1.0
+# xy 6 1.0 1.0
+# xy 7 2.0 1.0
+# xy 8 3.0 1.0
+# xy 9 4.0 1.0
+# xy 10 0.0 2.0
+# xy 11 1.0 2.0
+# xy 12 2.0 2.0
+# xy 13 3.0 2.0
+# xy 14 4.0 2.0
+# xy 15 0.0 3.0
+# xy 16 1.0 3.0
+# xy 17 2.0 3.0
+# xy 18 3.0 3.0
+# xy 19 4.0 3.0
+# xy 20 0.0 4.0
+# xy 21 1.0 4.0
+# xy 22 2.0 4.0
+# xy 23 3.0 4.0
+# xy 24 4.0 4.0
+#
+# --- hard edges ---
+0 1
+1 2
+2 3
+3 4
+0 5
+1 6
+2 7
+3 8
+4 9
+5 6
+6 7
+7 8
+8 9
+5 10
+6 11
+7 12
+8 13
+9 14
+10 11
+11 12
+12 13
+13 14
+10 15
+11 16
+12 17
+13 18
+14 19
+15 16
+16 17
+17 18
+18 19
+15 20
+16 21
+17 22
+18 23
+19 24
+20 21
+21 22
+22 23
+23 24
+`;
 
 const state = {
   mode: "live", // live | static
@@ -132,7 +204,7 @@ function applyRestoredForm(form) {
   if (form.fpa != null) el("fpa").value = form.fpa;
   if (form.timeout != null) el("timeout").value = form.timeout;
   if (form.saveCase != null) el("saveCase").checked = !!form.saveCase;
-  if (form.customEl != null) el("customEl").value = form.customEl;
+  el("customEl").value = form.customEl?.trim() ? form.customEl : DEFAULT_CUSTOM_EL;
   syncTaskParams();
   syncCustomGraphUi();
 }
@@ -339,7 +411,7 @@ function applyFormSnapshot(s) {
   el("saveCase").checked = !!s.saveCase;
   el("fpa").value = s.fpa ?? "0";
   el("timeout").value = s.timeout ?? "90";
-  if (s.customEl != null) el("customEl").value = s.customEl;
+  el("customEl").value = s.customEl?.trim() ? s.customEl : DEFAULT_CUSTOM_EL;
   syncTaskParams();
   syncCustomGraphUi();
 }
