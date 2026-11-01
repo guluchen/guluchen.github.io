@@ -15,9 +15,11 @@ const COLORS = {
   text: "#e8eef2",
 };
 
-const SESSION_KEY = "easyqecc-demo-live-v1";
+const SESSION_KEY = "easyqecc-demo-live-v3";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102a";
+const ASSET_V = "20261102d";
+const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
+const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 
 const state = {
   mode: "live", // live | static
@@ -319,12 +321,15 @@ function applyFormSnapshot(s) {
   if (s.presetId && [...el("presetSelect").options].some((o) => o.value === s.presetId)) {
     el("presetSelect").value = s.presetId;
   }
-  el("runMode").value = s.runMode || "search-min-n";
+  el("runMode").value = s.runMode || "place";
   el("kMin").value = s.kMin ?? "1";
   el("nFixed").value = s.nFixed ?? "7";
   el("kFixed").value = s.kFixed ?? "1";
-  if (s.placeCode && [...el("placeCode").options].some((o) => o.value === s.placeCode)) {
-    el("placeCode").value = s.placeCode;
+  {
+    const placeCode = s.placeCode || DEFAULT_PLACE_CODE;
+    if (placeCode && [...el("placeCode").options].some((o) => o.value === placeCode)) {
+      el("placeCode").value = placeCode;
+    }
   }
   if (s.distanceMode && [...el("distanceMode").options].some((o) => o.value === s.distanceMode)) {
     el("distanceMode").value = s.distanceMode;
@@ -332,7 +337,7 @@ function applyFormSnapshot(s) {
   el("css").checked = !!s.css;
   el("distinct").checked = s.distinct !== false;
   el("saveCase").checked = !!s.saveCase;
-  el("fpa").value = s.fpa ?? "1";
+  el("fpa").value = s.fpa ?? "0";
   el("timeout").value = s.timeout ?? "90";
   if (s.customEl != null) el("customEl").value = s.customEl;
   syncTaskParams();
@@ -625,7 +630,10 @@ async function loadPresets() {
   const hasSession =
     state.live.graph || state.live.logHtml || state.jobId || state.live.layout;
   if (state.mode === "live" && state.presets.length && !hasSession) {
-    await loadGraph(state.presets[0].id);
+    const preferred =
+      state.presets.find((p) => p.id === DEFAULT_PRESET_ID) || state.presets[0];
+    el("presetSelect").value = preferred.id;
+    await loadGraph(preferred.id);
   }
 }
 
@@ -1085,7 +1093,7 @@ async function runLive() {
     body.k = Number(el("kFixed").value);
   }
   if (body.mode === "place") {
-    body.matrix = el("placeCode").value || "examples/matrices/five-qubit.pcm";
+    body.matrix = el("placeCode").value || DEFAULT_PLACE_CODE;
   }
 
   el("runBtn").disabled = true;

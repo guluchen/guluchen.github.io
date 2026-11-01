@@ -49,11 +49,11 @@
 
         <label for="runMode">Task</label>
         <select id="runMode">
-          <option value="search-min-n" selected>Search k=1, smallest n</option>
+          <option value="place" selected>Place known code</option>
+          <option value="search-min-n">Search k=1, smallest n</option>
           <option value="search-min-n-k2">Search k=2, smallest n</option>
           <option value="search">Search largest k first</option>
           <option value="fixed">Fixed size (n, k)</option>
-          <option value="place">Place known code</option>
         </select>
 
         <div id="searchParams" class="hidden">
@@ -61,21 +61,21 @@
           <input id="kMin" type="number" min="1" value="1" />
           <p class="mode-hint">Tried from large k down to this value.</p>
         </div>
-        <p class="mode-hint" id="searchMinNHint">Tries [[n,1,d≥3]] with n = 2, 3, … until a layout fits.</p>
+        <p class="mode-hint hidden" id="searchMinNHint">Tries [[n,1,d≥3]] with n = 2, 3, … until a layout fits.</p>
         <div id="fixedParams" class="hidden">
           <label for="nFixed">Data qubits n</label>
           <input id="nFixed" type="number" min="2" value="7" />
           <label for="kFixed">Logical qubits k</label>
           <input id="kFixed" type="number" min="1" value="1" />
         </div>
-        <div id="placeParams" class="hidden">
+        <div id="placeParams">
           <label for="placeCode">Code to place</label>
           <select id="placeCode">
+            <option value="examples/matrices/surface-9-1-3.pcm" selected>Surface [[9,1,3]]</option>
             <option value="examples/matrices/five-qubit.pcm">Five-qubit [[5,1,3]]</option>
-            <option value="examples/matrices/surface-9-1-3.pcm">Surface [[9,1,3]]</option>
             <option value="examples/matrices/steane-7-1-3.pcm">Steane [[7,1,3]]</option>
           </select>
-          <p class="mode-hint">Places a fixed stabilizer matrix onto the selected chip.</p>
+          <p class="mode-hint">Places a fixed stabilizer matrix onto the selected chip. Default: surface [[9,1,3]] with distinct ancillas.</p>
         </div>
 
         <div class="checks">
@@ -96,8 +96,8 @@
         </div>
 
         <label for="fpa">Flags per ancilla</label>
-        <input id="fpa" type="number" min="0" step="1" value="1" />
-        <p class="mode-hint">0 = no exclusive flags. Default 1.</p>
+        <input id="fpa" type="number" min="0" step="1" value="0" />
+        <p class="mode-hint">0 = no exclusive flags (default). Extra flags make placement much harder.</p>
 
         <label for="timeout">Time limit (seconds per size)</label>
         <input id="timeout" type="number" min="5" value="90" />
@@ -126,6 +126,6 @@
     </aside>
   </main>
 
-  <script src="app.js?v=k2-2"></script>
+  <script src="app.js?v=20261102c"></script>
 </body>
 </html>

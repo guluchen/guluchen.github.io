@@ -2,15 +2,15 @@
   "presets": [
     {
       "group": "vendor",
-      "id": "iqm-garnet-20",
-      "label": "IQM Garnet 20",
-      "n_qubits": 20
-    },
-    {
-      "group": "vendor",
       "id": "iqm-aphrodite-54",
       "label": "IQM Aphrodite 54",
       "n_qubits": 54
+    },
+    {
+      "group": "vendor",
+      "id": "iqm-garnet-20",
+      "label": "IQM Garnet 20",
+      "n_qubits": 20
     },
     {
       "group": "vendor",
