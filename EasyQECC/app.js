@@ -15,9 +15,9 @@ const COLORS = {
   text: "#e8eef2",
 };
 
-const SESSION_KEY = "easyqecc-demo-live-v4";
+const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102f";
+const ASSET_V = "20261102h";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -204,9 +204,116 @@ function applyRestoredForm(form) {
   if (form.fpa != null) el("fpa").value = form.fpa;
   if (form.timeout != null) el("timeout").value = form.timeout;
   if (form.saveCase != null) el("saveCase").checked = !!form.saveCase;
-  el("customEl").value = form.customEl?.trim() ? form.customEl : DEFAULT_CUSTOM_EL;
+  el("customEl").value = preferCustomEl(form.customEl);
   syncTaskParams();
   syncCustomGraphUi();
+}
+
+/** True for empty / old triangle placeholder — not a real user graph. */
+function isStaleCustomEl(text) {
+  const t = (text || "").trim();
+  if (!t) return true;
+  if (/#\s*name:\s*my-chip/i.test(t)) return true;
+  if (/^0\s+1\s*\n\s*1\s+2\s*\n\s*2\s+0\s*$/m.test(t) && !/#\s*xy\b/i.test(t)) return true;
+  return false;
+}
+
+function preferCustomEl(text) {
+  return isStaleCustomEl(text) ? DEFAULT_CUSTOM_EL : text;
+}
+
+function ensureCustomElDefault() {
+  const box = el("customEl");
+  if (!box) return;
+  if (isStaleCustomEl(box.value)) box.value = DEFAULT_CUSTOM_EL;
+}
+
+/** Parse `# xy id x y` comments from an edge-list string → coords aligned to vertex order. */
+function coordsFromElText(text, vertices) {
+  if (!text || !vertices?.length) return null;
+  const found = new Map();
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.trim().match(/^#\s*xy\s+(\d+)\s+([+-]?\d+(?:\.\d+)?)\s+([+-]?\d+(?:\.\d+)?)\s*$/i);
+    if (!m) continue;
+    found.set(Number(m[1]), [Number(m[2]), Number(m[3])]);
+  }
+  if (found.size !== vertices.length) return null;
+  const coords = [];
+  for (const id of vertices) {
+    const xy = found.get(id);
+    if (!xy) return null;
+    coords.push(xy);
+  }
+  return coords;
+}
+
+/**
+ * If the graph is an R×C 4-neighbor grid under row-major vertex ids 0..n-1,
+ * return those lattice coordinates. Otherwise null (caller may use a circle).
+ */
+function inferRectGridCoords(g) {
+  const n = g?.n_vertices | 0;
+  if (n < 4 || !Array.isArray(g?.edges) || !Array.isArray(g?.vertices)) return null;
+  // Contiguous 0..n-1 labeling only.
+  for (let i = 0; i < n; i++) {
+    if (g.vertices[i] !== i) return null;
+  }
+  const edgeSet = new Set();
+  for (const e of g.edges) {
+    const a = e[0];
+    const b = e[1];
+    if (a === b || a < 0 || b < 0 || a >= n || b >= n) return null;
+    edgeSet.add(`${Math.min(a, b)}-${Math.max(a, b)}`);
+  }
+  const candidates = [];
+  for (let cols = 2; cols * cols <= n; cols++) {
+    if (n % cols === 0) {
+      const rows = n / cols;
+      candidates.push([rows, cols]);
+      if (rows !== cols) candidates.push([cols, rows]);
+    }
+  }
+  // Prefer near-square shapes first.
+  candidates.sort((a, b) => Math.abs(a[0] - a[1]) - Math.abs(b[0] - b[1]));
+  for (const [rows, cols] of candidates) {
+    const need = new Set();
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const v = r * cols + c;
+        if (c + 1 < cols) need.add(`${v}-${v + 1}`);
+        if (r + 1 < rows) need.add(`${v}-${v + cols}`);
+      }
+    }
+    // Accept exact grid, or grid plus extra edges (e.g. diagonals).
+    let ok = need.size > 0;
+    for (const key of need) {
+      if (!edgeSet.has(key)) {
+        ok = false;
+        break;
+      }
+    }
+    if (!ok) continue;
+    const coords = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) coords.push([c, r]);
+    }
+    return coords;
+  }
+  return null;
+}
+
+function resolveGraphCoords(g, elText) {
+  if (g?.coords && g.coords.length === g.n_vertices) return g.coords;
+  const fromEl = coordsFromElText(elText || state.graphEl?.[g?.id] || el("customEl")?.value, g?.vertices);
+  if (fromEl) return fromEl;
+  const grid = inferRectGridCoords(g);
+  if (grid) return grid;
+  const coords = [];
+  for (let i = 0; i < g.n_vertices; i++) {
+    const ang = (Math.PI * 2 * i) / Math.max(g.n_vertices, 1) - Math.PI / 2;
+    coords.push([Math.cos(ang), Math.sin(ang)]);
+  }
+  return coords;
 }
 
 function pcmFieldsFromLayout(layout) {
@@ -411,7 +518,7 @@ function applyFormSnapshot(s) {
   el("saveCase").checked = !!s.saveCase;
   el("fpa").value = s.fpa ?? "0";
   el("timeout").value = s.timeout ?? "90";
-  el("customEl").value = s.customEl?.trim() ? s.customEl : DEFAULT_CUSTOM_EL;
+  el("customEl").value = preferCustomEl(s.customEl);
   syncTaskParams();
   syncCustomGraphUi();
 }
@@ -712,6 +819,7 @@ async function loadPresets() {
 function syncCustomGraphUi() {
   const custom = el("presetSelect").value === "custom";
   el("customGraphWrap").classList.toggle("hidden", !custom);
+  if (custom) ensureCustomElDefault();
 }
 
 function ensureWorker() {
@@ -780,10 +888,18 @@ async function previewCustomGraph() {
       g = await workerParseGraph("custom", text);
     }
     state.graphEl.custom = text;
+    const hadCoords = !!(g.coords && g.coords.length === g.n_vertices);
+    g.coords = resolveGraphCoords(g, text);
+    const inferred = !hadCoords && !!inferRectGridCoords({ ...g, coords: null });
     const head =
       `${g.name || "custom"}  ·  ${g.n_vertices} qubits  ·  ${g.edges.length} couplers`;
     setLiveGraph(g, head);
     liveLog(`Loaded custom graph: ${g.n_vertices} qubits, ${g.edges.length} couplers.`, "ok");
+    if (!hadCoords && inferred) {
+      liveLog("No # xy layout in the edge list — drew as a rectangular grid.", "info");
+    } else if (!hadCoords && !coordsFromElText(text, g.vertices)) {
+      liveLog("No # xy layout in the edge list — drew on a circle. Add `# xy id x y` lines for a fixed layout.", "info");
+    }
   } catch (e) {
     liveLog(String(e.message || e), "bad");
   }
@@ -978,14 +1094,7 @@ function draw() {
 
   if (!g) return;
 
-  let coords = g.coords;
-  if (!coords || coords.length !== g.n_vertices) {
-    coords = [];
-    for (let i = 0; i < g.n_vertices; i++) {
-      const ang = (Math.PI * 2 * i) / Math.max(g.n_vertices, 1) - Math.PI / 2;
-      coords.push([Math.cos(ang), Math.sin(ang)]);
-    }
-  }
+  let coords = resolveGraphCoords(g, state.graphEl?.[g.id] || state.graphEl?.custom);
 
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
   for (const [x, y] of coords) {
@@ -1367,8 +1476,10 @@ el("cancelBadgeBtn").addEventListener("click", cancelJob);
 window.addEventListener("resize", draw);
 
 async function boot() {
+  ensureCustomElDefault();
   const saved = restoreLiveSession();
   if (saved?.form) applyRestoredForm(saved.form);
+  ensureCustomElDefault();
   if (saved?.live) {
     Object.assign(state.live, saved.live);
     if (saved.live.graph || saved.live.logHtml) {
