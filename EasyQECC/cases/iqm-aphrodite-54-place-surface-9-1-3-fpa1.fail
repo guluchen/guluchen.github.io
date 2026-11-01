@@ -1,0 +1,14 @@
+CaDiCaL configuration=sat version=cadical-1.9.5
+=== CNF stats for place n=9 m=8 |V|=54 distinct_ancilla=false css=false fpa=1 ===
+constraint                      clauses   avg_lits
+--------------------------------------------------
+cardinality_data                   4331       2.32
+canonical_slots                    9747       2.24
+projected_check                    8640       2.00
+unique_ancilla                     6888       2.25
+hardware_compatibility              864       4.33
+ancilla_exclusive_flags           17094       2.25
+--------------------------------------------------
+TOTAL                             47564       2.25
+variables: 12628
+No compatible layout exists for these parameters

@@ -8,11 +8,15 @@
     "flags_per_ancilla": 1,
     "n": 9,
     "m": 8,
-    "timeout": 600,
+    "timeout": 30,
     "matrix": "surface-9-1-3"
   },
   "layout": null,
   "png": null,
   "detail": null,
-  "exit_code": 1
+  "exit_code": 1,
+  "provenance": {
+    "topology_source_commit": "ef0832a46eac903e8d8eb5fd1da2f6194578ead7",
+    "topology_edges": 90
+  }
 }
