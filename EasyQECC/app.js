@@ -473,6 +473,7 @@ function applyCaseParamsToForm(doc) {
 function normalizeDistanceMode(raw) {
   if (!raw) return null;
   const s = String(raw).toLowerCase();
+  if (s === "cegar-distqldpc" || s === "distqldpc" || s === "default") return "cegar-distqldpc";
   if (s === "cegar" || s === "lazy") return "cegar";
   if (s === "exact" || s === "eager") return "exact";
   if (s === "strict" || s === "detect-all" || s === "detect_all" || s === "detectall") return "strict";
@@ -1054,7 +1055,7 @@ async function runLive() {
   const body = {
     graph: graphId,
     mode: el("runMode").value,
-    distance_mode: el("distanceMode").value || "cegar",
+    distance_mode: el("distanceMode").value || "cegar-distqldpc",
     css: el("css").checked,
     distinct_ancilla: el("distinct").checked,
     flags_per_ancilla: Math.max(0, Math.floor(Number(el("fpa").value) || 0)),
@@ -1263,6 +1264,10 @@ async function cancelJob() {
 el("modeLive").addEventListener("click", () => setMode("live"));
 el("modeStatic").addEventListener("click", () => setMode("static"));
 el("runMode").addEventListener("change", syncTaskParams);
+el("distanceMode").addEventListener("change", () => {
+  // DistQLDPC path is CSS-only; keep the checkbox aligned with the CLI default.
+  if (el("distanceMode").value === "cegar-distqldpc") el("css").checked = true;
+});
 el("presetSelect").addEventListener("change", () => {
   if (state.mode !== "live") return;
   syncCustomGraphUi();

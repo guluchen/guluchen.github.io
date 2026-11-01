@@ -79,7 +79,7 @@
         </div>
 
         <div class="checks">
-          <label><input type="checkbox" id="css" /> CSS stabilizers</label>
+          <label><input type="checkbox" id="css" checked /> CSS stabilizers</label>
           <label><input type="checkbox" id="distinct" checked /> Distinct ancillas</label>
           <label id="saveCaseLabel"><input type="checkbox" id="saveCase" /> Save result into Static cases</label>
         </div>
@@ -87,11 +87,12 @@
         <div id="distanceParams">
           <label for="distanceMode">Distance check</label>
           <select id="distanceMode">
-            <option value="cegar" selected>d ≥ 3 (lazy)</option>
+            <option value="cegar-distqldpc" selected>d ≥ 3 (DistQLDPC, CSS)</option>
+            <option value="cegar">d ≥ 3 (local CEGAR)</option>
             <option value="exact">d ≥ 3 (eager)</option>
             <option value="strict">Strict (forbid wt≤2 stabilizers)</option>
           </select>
-          <p class="mode-hint">Lazy/eager are true d≥3. Strict is stronger and excludes codes like surface [[9,1,3]]. Place ignores this.</p>
+          <p class="mode-hint">Default uses DistQLDPC MaxSAT on CSS codes (native serve). WASM Live falls back to local CEGAR. Place ignores this.</p>
         </div>
 
         <label for="fpa">Flags per ancilla</label>
