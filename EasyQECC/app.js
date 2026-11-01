@@ -16,6 +16,8 @@ const COLORS = {
 };
 
 const SESSION_KEY = "easyqecc-demo-live-v1";
+/** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
+const ASSET_V = "20261102a";
 
 const state = {
   mode: "live", // live | static
@@ -598,14 +600,15 @@ async function refreshCatalog() {
   } catch (_) {
     state.backend = "wasm";
     try {
-      const data = await fetchJson("presets.json");
+      // Cache-bust so Pages CDN does not keep a stale preset catalog.
+      const data = await fetchJson(`presets.json?v=${ASSET_V}`);
       state.presets = data.presets || [];
     } catch (e) {
       liveLog("Could not load presets.", "bad");
       return;
     }
     try {
-      const idx = await fetchJson("cases/index.json").catch(() => ({ cases: [] }));
+      const idx = await fetchJson(`cases/index.json?v=${ASSET_V}`).catch(() => ({ cases: [] }));
       state.cases = idx.cases || [];
     } catch (_) {
       state.cases = [];
@@ -725,12 +728,12 @@ async function loadGraph(id) {
       throw new Error("use static");
     }
   } catch (_) {
-    g = await fetchJson(`graphs/${id}.json`);
+    g = await fetchJson(`graphs/${id}.json?v=${ASSET_V}`);
   }
   if (g.el) state.graphEl[id] = g.el;
   else if (!state.graphEl[id]) {
     try {
-      state.graphEl[id] = await fetch(`graphs/${id}.el`).then((r) => {
+      state.graphEl[id] = await fetch(`graphs/${id}.el?v=${ASSET_V}`).then((r) => {
         if (!r.ok) throw new Error(r.statusText);
         return r.text();
       });
