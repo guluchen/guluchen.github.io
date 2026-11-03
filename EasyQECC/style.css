@@ -140,6 +140,8 @@ body {
 .panel:last-child {
   border-right: 0;
   border-left: 1px solid #24323c;
+  overflow: auto;
+  max-height: calc(100vh - 2.6rem);
 }
 
 .panel h2 {
@@ -153,7 +155,7 @@ body {
 
 #controls {
   overflow: auto;
-  max-height: calc(100vh - 7rem);
+  max-height: calc(100vh - 2.6rem);
 }
 
 .actions-top {
@@ -299,9 +301,30 @@ button.cancel {
   font-size: 0.78rem;
   line-height: 1.45;
   color: var(--muted);
-  max-height: calc(100vh - 360px);
+  max-height: min(42vh, calc(100vh - 280px));
   overflow: auto;
   white-space: pre-wrap;
+}
+
+@media (max-width: 980px) {
+  #controls,
+  .panel:last-child {
+    max-height: none;
+  }
+
+  .log {
+    max-height: 280px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+
+  #modeHint {
+    flex: 1 1 100%;
+    order: 3;
+  }
 }
 
 .pcm-wrap {
