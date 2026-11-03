@@ -108,6 +108,15 @@ body {
   font-size: 0.85rem;
 }
 
+/* Status stays on the single top bar; overflow is ellipsis, full text is the title. */
+#modeHint {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .workspace {
   flex: 1;
   display: grid;
