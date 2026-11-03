@@ -39,11 +39,12 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.65rem 0.85rem;
-  padding: 0.4rem 0.85rem;
+  padding: 0.35rem 0.85rem;
   border-bottom: 1px solid #24323c;
   background: rgba(14, 20, 25, 0.55);
+  min-height: 2.4rem;
 }
 
 .brand {
