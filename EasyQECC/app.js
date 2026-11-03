@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261103a";
+const ASSET_V = "20261103b";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -1013,9 +1013,10 @@ function syncCustomGraphUi() {
 
 function ensureWorker() {
   if (state.worker) return state.worker;
-  state.worker = new Worker(new URL("worker.js", window.location.href), {
-    type: "module",
-  });
+  state.worker = new Worker(
+    new URL(`worker.js?v=${ASSET_V}`, window.location.href),
+    { type: "module" }
+  );
   return state.worker;
 }
 

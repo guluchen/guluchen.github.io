@@ -1,12 +1,17 @@
 /* EasyQECC Live Web Worker: Rust encode WASM + JS CaDiCaL (cadical-wasm). */
 
 import { Cadical, createModule } from "./vendor/cadical-wasm/index.js";
-import init, {
+
+/** Cache-bust pkg imports when the main page reloads worker.js?v=… */
+const ASSET_V = new URL(import.meta.url).searchParams.get("v") || "0";
+
+const {
+  default: init,
   setSatBridge,
   runSolve,
   cancelSolve,
   parseGraphEl,
-} from "./pkg/easyqecc_wasm.js";
+} = await import(`./pkg/easyqecc_wasm.js?v=${ASSET_V}`);
 
 let ready = null;
 let solver = null;
@@ -106,7 +111,7 @@ async function ensureReady() {
         return file;
       },
     });
-    await init(new URL("./pkg/easyqecc_wasm_bg.wasm", import.meta.url));
+    await init(new URL(`./pkg/easyqecc_wasm_bg.wasm?v=${ASSET_V}`, import.meta.url));
     wireBridge();
   })();
   return ready;
