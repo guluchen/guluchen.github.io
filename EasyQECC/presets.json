@@ -32,6 +32,12 @@
     },
     {
       "group": "vendor",
+      "id": "ibm-eagle-127",
+      "label": "IBM Eagle 127",
+      "n_qubits": 127
+    },
+    {
+      "group": "vendor",
       "id": "ibm-heavyhex-27",
       "label": "IBM Heavy-hex 27",
       "n_qubits": 27
