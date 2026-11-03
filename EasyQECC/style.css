@@ -150,6 +150,26 @@ body {
   font-weight: 500;
 }
 
+#controls {
+  overflow: auto;
+  max-height: calc(100vh - 7rem);
+}
+
+.actions-top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0 0 0.85rem;
+  padding: 0 0 0.75rem;
+  background: linear-gradient(180deg, rgba(14, 20, 25, 0.98) 70%, rgba(14, 20, 25, 0));
+  border-bottom: 1px solid #24323c;
+}
+
+.actions-top .run,
+.actions-top .cancel {
+  flex: 1;
+}
+
 label {
   display: block;
   font-size: 0.82rem;
@@ -202,7 +222,7 @@ textarea {
 .actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 1.1rem;
+  margin-top: 0;
 }
 
 button.run, button.cancel {
@@ -235,6 +255,7 @@ button.cancel {
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: auto;
   background:
     linear-gradient(rgba(46, 196, 182, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(46, 196, 182, 0.04) 1px, transparent 1px),

@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102m";
+const ASSET_V = "20261102n";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -498,7 +498,7 @@ function hitTestGraph(mx, my) {
   if (bestNode) return { kind: "node", id: bestNode.id, x: bestNode.x, y: bestNode.y, r: bestNode.r };
   let bestEdge = null;
   let bestEdgeD = Infinity;
-  const lim = 7;
+    const lim = 12;
   for (const e of hit.edges) {
     const d = distToSegment(mx, my, e.x0, e.y0, e.x1, e.y1);
     if (d <= lim && d < bestEdgeD) {
@@ -1252,28 +1252,20 @@ function draw() {
   const ctx = canvas.getContext("2d");
   const g = state.graph;
 
-  // Size stage before measuring — Eagle / large chips need more vertical room.
-  const stage = canvas.parentElement;
-  if (stage && g && g.n_vertices > 60) {
-    stage.style.minHeight = "560px";
-    canvas.style.minHeight = "520px";
-  } else if (stage) {
-    stage.style.minHeight = "";
-    canvas.style.minHeight = "";
-  }
-
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.clientWidth || 900;
-  const h = canvas.clientHeight || 640;
-  canvas.width = Math.floor(w * dpr);
-  canvas.height = Math.floor(h * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = COLORS.bg;
-  ctx.fillRect(0, 0, w, h);
-
   if (!g) {
     state.drawHit = null;
     canvas.style.cursor = "default";
+    canvas.style.minWidth = "";
+    canvas.style.width = "";
+    canvas.style.minHeight = "";
+    const dpr0 = window.devicePixelRatio || 1;
+    const w0 = canvas.clientWidth || 900;
+    const h0 = canvas.clientHeight || 640;
+    canvas.width = Math.floor(w0 * dpr0);
+    canvas.height = Math.floor(h0 * dpr0);
+    ctx.setTransform(dpr0, 0, 0, dpr0, 0, 0);
+    ctx.fillStyle = COLORS.bg;
+    ctx.fillRect(0, 0, w0, h0);
     return;
   }
 
@@ -1284,21 +1276,52 @@ function draw() {
     minX = Math.min(minX, x); maxX = Math.max(maxX, x);
     minY = Math.min(minY, y); maxY = Math.max(maxY, y);
   }
+  const idToIndex = {};
+  g.vertices.forEach((id, i) => { idToIndex[id] = i; });
+  const large = g.n_vertices > 60;
+  // Keep couplers long enough to click; allow the stage to scroll if needed.
+  const MIN_EDGE_PX = large ? 22 : 36;
+  let minEdgeData = Infinity;
+  for (const [a, b] of g.edges || []) {
+    const ia = idToIndex[a];
+    const ib = idToIndex[b];
+    if (ia == null || ib == null) continue;
+    const dx0 = coords[ia][0] - coords[ib][0];
+    const dy0 = coords[ia][1] - coords[ib][1];
+    minEdgeData = Math.min(minEdgeData, Math.hypot(dx0, dy0));
+  }
   const pad = 28;
-  const sx = (w - 2 * pad) / Math.max(maxX - minX, 1e-6);
-  const sy = (h - 2 * pad) / Math.max(maxY - minY, 1e-6);
-  const s = Math.min(sx, sy);
-  // Horizontally center; top-align so unused canvas height doesn't open a gap
-  // under the stage caption (wide/shallow chips used to look "egg-spaced").
+  const spanX = Math.max(maxX - minX, 1e-6);
+  const spanY = Math.max(maxY - minY, 1e-6);
+  const sEdge = Number.isFinite(minEdgeData) && minEdgeData > 1e-9
+    ? MIN_EDGE_PX / minEdgeData
+    : 0;
+  const viewW = canvas.parentElement?.clientWidth || canvas.clientWidth || 900;
+  const viewH = Math.max(280, (canvas.parentElement?.clientHeight || 420) - 48);
+  const sFit = Math.min((viewW - 2 * pad) / spanX, (viewH - 2 * pad) / spanY);
+  const s = Math.max(sFit, sEdge);
+  const contentW = Math.ceil(spanX * s + 2 * pad);
+  const contentH = Math.ceil(spanY * s + 2 * pad + 36);
+  canvas.style.minWidth = contentW > viewW ? `${contentW}px` : "";
+  canvas.style.width = contentW > viewW ? `${contentW}px` : "";
+  canvas.style.minHeight = `${Math.max(viewH, contentH)}px`;
+
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth || contentW;
+  const h = canvas.clientHeight || contentH;
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // Horizontally center when it fits; top-align always.
   const map = ([x, y]) => [
-    pad + (x - minX) * s + ((w - 2 * pad) - (maxX - minX) * s) / 2,
+    pad + (x - minX) * s + Math.max(0, (w - 2 * pad) - spanX * s) / 2,
     pad + (y - minY) * s,
   ];
 
-  const idToIndex = {};
-  g.vertices.forEach((id, i) => { idToIndex[id] = i; });
   const used = usedEdges(state.layout);
-  const large = g.n_vertices > 60;
   const hover = state.hoverHit;
   const hitNodes = [];
   const hitEdges = [];

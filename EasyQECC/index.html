@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20261102m" />
+  <link rel="stylesheet" href="style.css?v=20261102n" />
 </head>
 <body>
   <header class="hero">
@@ -29,6 +29,10 @@
   <main class="workspace">
     <aside class="panel" id="controls">
       <h2>Hardware</h2>
+      <div class="actions actions-top" id="liveActions">
+        <button type="button" class="run" id="runBtn">Run</button>
+        <button type="button" class="cancel" id="cancelBtn">Cancel</button>
+      </div>
       <div id="controlsBody">
         <label for="presetSelect" id="selectLabel">Chip / graph</label>
         <select id="presetSelect"></select>
@@ -167,11 +171,6 @@
         <label for="timeout">Time limit (seconds per size)</label>
         <input id="timeout" type="number" min="5" value="90" />
         <p class="mode-hint">Live stops when this budget is hit (no need to Cancel).</p>
-
-        <div class="actions" id="liveActions">
-          <button type="button" class="run" id="runBtn">Run</button>
-          <button type="button" class="cancel" id="cancelBtn">Cancel</button>
-        </div>
       </div>
     </aside>
 
@@ -194,6 +193,6 @@
     </aside>
   </main>
 
-  <script src="app.js?v=20261102m"></script>
+  <script src="app.js?v=20261102n"></script>
 </body>
 </html>
