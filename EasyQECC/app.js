@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102i";
+const ASSET_V = "20261102j";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -1172,13 +1172,15 @@ function draw() {
     minX = Math.min(minX, x); maxX = Math.max(maxX, x);
     minY = Math.min(minY, y); maxY = Math.max(maxY, y);
   }
-  const pad = g.n_vertices > 60 ? 28 : 36;
+  const pad = g.n_vertices > 60 ? 28 : 28;
   const sx = (w - 2 * pad) / Math.max(maxX - minX, 1e-6);
   const sy = (h - 2 * pad) / Math.max(maxY - minY, 1e-6);
   const s = Math.min(sx, sy);
+  // Horizontally center; top-align so unused canvas height doesn't open a gap
+  // under the stage caption (wide/shallow chips used to look "egg-spaced").
   const map = ([x, y]) => [
     pad + (x - minX) * s + ((w - 2 * pad) - (maxX - minX) * s) / 2,
-    pad + (y - minY) * s + ((h - 2 * pad) - (maxY - minY) * s) / 2,
+    pad + (y - minY) * s,
   ];
 
   const idToIndex = {};
