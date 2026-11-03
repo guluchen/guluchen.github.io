@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102h";
+const ASSET_V = "20261102i";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -387,7 +387,77 @@ function applyLiveToDom() {
   el("pcmHint").textContent = state.live.pcmHint;
   el("pcmWrap").classList.toggle("hidden", state.live.pcmHidden);
   el("log").scrollTop = el("log").scrollHeight;
+  syncEditGraphBtn();
   draw();
+}
+
+function syncEditGraphBtn() {
+  const btn = el("editGraphBtn");
+  if (!btn) return;
+  const show = state.mode === "live" && !!state.live.graph;
+  btn.hidden = !show;
+  btn.disabled = !show;
+}
+
+/** Serialize a loaded graph JSON (+ optional cached .el) into editable edge-list text. */
+function graphToElText(g, preferredEl) {
+  if (preferredEl && preferredEl.trim()) return preferredEl.replace(/\s+$/, "") + "\n";
+  if (!g) return "";
+  const name = g.name || g.id || "custom";
+  const coords = resolveGraphCoords(g, null);
+  const lines = [
+    `# name: ${name}`,
+    `# |V|=${g.n_vertices} |E|=${(g.edges || []).length}`,
+    "#",
+  ];
+  for (let i = 0; i < (g.vertices || []).length; i++) {
+    const id = g.vertices[i];
+    const [x, y] = coords[i] || [0, 0];
+    lines.push(`# xy ${id} ${Number(x).toFixed(6)} ${Number(y).toFixed(6)}`);
+  }
+  lines.push("#");
+  lines.push("# --- hard edges ---");
+  const edges = [...(g.edges || [])]
+    .map(([a, b]) => [Math.min(a, b), Math.max(a, b)])
+    .sort((u, v) => u[0] - v[0] || u[1] - v[1]);
+  for (const [a, b] of edges) lines.push(`${a} ${b}`);
+  return lines.join("\n") + "\n";
+}
+
+async function editCurrentGraphAsCustom() {
+  if (state.mode !== "live") return;
+  const g = state.live.graph || state.graph;
+  if (!g) {
+    liveLog("Load a chip first.", "bad");
+    return;
+  }
+  const presetId = el("presetSelect").value;
+  let sourceEl = null;
+  if (presetId === "custom") {
+    sourceEl = el("customEl").value;
+  } else {
+    sourceEl = state.graphEl[presetId] || state.graphEl[g.id] || g.el || null;
+    if (!sourceEl && presetId && presetId !== "custom") {
+      try {
+        sourceEl = await fetch(`graphs/${presetId}.el?v=${ASSET_V}`).then((r) => {
+          if (!r.ok) throw new Error(r.statusText);
+          return r.text();
+        });
+        state.graphEl[presetId] = sourceEl;
+      } catch (_) {
+        /* fall through to reconstruct */
+      }
+    }
+  }
+  const text = graphToElText(g, sourceEl);
+  el("presetSelect").value = "custom";
+  el("customEl").value = text;
+  syncCustomGraphUi();
+  el("customEl").focus();
+  el("customEl").scrollTop = 0;
+  await previewCustomGraph();
+  liveLog(`Editing as custom edge list (from ${g.name || g.id || "graph"}).`, "ok");
+  saveLiveSession();
 }
 
 /** DOM-only log (Static case view). Never touches state.live. */
@@ -535,6 +605,7 @@ function setStaticChrome(on) {
   el("customGraphWrap").classList.add("hidden");
   if (on) el("saveCaseLabel").classList.add("hidden");
   else syncSaveCaseUi();
+  syncEditGraphBtn();
 
   const lockIds = [
     "runMode",
@@ -1464,6 +1535,9 @@ el("presetSelect").addEventListener("change", () => {
   if (state.mode !== "live") return;
   syncCustomGraphUi();
   loadGraph(el("presetSelect").value);
+});
+el("editGraphBtn").addEventListener("click", () => {
+  editCurrentGraphAsCustom().catch((e) => liveLog(String(e.message || e), "bad"));
 });
 el("caseSelect").addEventListener("change", () => {
   if (state.mode !== "static") return;
