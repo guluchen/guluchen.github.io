@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261103c";
+const ASSET_V = "20261103d";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -114,6 +114,11 @@ const state = {
   drawHit: null,
   /** { kind:"node"|"edge", ... } under the cursor while editable. */
   hoverHit: null,
+  /**
+   * Cached graph→canvas layout (scale/size). Hover redraws must reuse this;
+   * recomputing from canvas minHeight feeds back and blows up node spacing.
+   */
+  drawGeom: null,
   /**
    * Live session buffer — only Live runs / poll events write here.
    * Static browsing must never mutate this, so switching back restores correctly.
@@ -1258,6 +1263,39 @@ function edgeKind(coords, ia, ib) {
   return "other";
 }
 
+function measureStageViewport(canvas) {
+  const stage = canvas.parentElement;
+  const head = stage?.querySelector(".stage-head-row");
+  // Clear canvas size overrides so stage reports the grid cell viewport, not
+  // the previous content-sized minHeight (that feedback blew up scale on hover).
+  const prevMinW = canvas.style.minWidth;
+  const prevW = canvas.style.width;
+  const prevMinH = canvas.style.minHeight;
+  canvas.style.minWidth = "";
+  canvas.style.width = "";
+  canvas.style.minHeight = "";
+  void stage?.offsetHeight;
+  const viewW = stage?.clientWidth || canvas.clientWidth || 900;
+  const viewH = Math.max(280, (stage?.clientHeight || 420) - (head?.offsetHeight || 48));
+  canvas.style.minWidth = prevMinW;
+  canvas.style.width = prevW;
+  canvas.style.minHeight = prevMinH;
+  return { viewW, viewH };
+}
+
+function drawGeomKey(g) {
+  if (!g) return "";
+  return [
+    g.id || g.name || "",
+    g.n_vertices,
+    (g.edges && g.edges.length) || 0,
+    state.layout ? "L" : "0",
+    window.devicePixelRatio || 1,
+    Math.round(window.innerWidth),
+    Math.round(window.innerHeight),
+  ].join("|");
+}
+
 function draw() {
   const canvas = el("graphCanvas");
   const ctx = canvas.getContext("2d");
@@ -1265,6 +1303,7 @@ function draw() {
 
   if (!g) {
     state.drawHit = null;
+    state.drawGeom = null;
     canvas.style.cursor = "default";
     canvas.style.minWidth = "";
     canvas.style.width = "";
@@ -1280,46 +1319,91 @@ function draw() {
     return;
   }
 
-  let coords = resolveGraphCoords(g, state.graphEl?.[g.id] || state.graphEl?.custom);
+  const key = drawGeomKey(g);
+  let geom = state.drawGeom && state.drawGeom.key === key ? state.drawGeom : null;
 
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-  for (const [x, y] of coords) {
-    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  if (!geom) {
+    const coords = resolveGraphCoords(g, state.graphEl?.[g.id] || state.graphEl?.custom);
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const [x, y] of coords) {
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    const idToIndex = {};
+    g.vertices.forEach((id, i) => { idToIndex[id] = i; });
+    const large = g.n_vertices > 60;
+    // Keep couplers long enough to click; allow the stage to scroll if needed.
+    const MIN_EDGE_PX = large ? 22 : 36;
+    let minEdgeData = Infinity;
+    for (const [a, b] of g.edges || []) {
+      const ia = idToIndex[a];
+      const ib = idToIndex[b];
+      if (ia == null || ib == null) continue;
+      const dx0 = coords[ia][0] - coords[ib][0];
+      const dy0 = coords[ia][1] - coords[ib][1];
+      minEdgeData = Math.min(minEdgeData, Math.hypot(dx0, dy0));
+    }
+    const pad = 28;
+    const spanX = Math.max(maxX - minX, 1e-6);
+    const spanY = Math.max(maxY - minY, 1e-6);
+    const sEdge = Number.isFinite(minEdgeData) && minEdgeData > 1e-9
+      ? MIN_EDGE_PX / minEdgeData
+      : 0;
+    const { viewW, viewH } = measureStageViewport(canvas);
+    const sFit = Math.min((viewW - 2 * pad) / spanX, (viewH - 2 * pad) / spanY);
+    const s = Math.max(sFit, sEdge);
+    const contentW = Math.ceil(spanX * s + 2 * pad);
+    const contentH = Math.ceil(spanY * s + 2 * pad + 36);
+    canvas.style.minWidth = contentW > viewW ? `${contentW}px` : "";
+    canvas.style.width = contentW > viewW ? `${contentW}px` : "";
+    canvas.style.minHeight = `${Math.max(viewH, contentH)}px`;
+    void canvas.offsetHeight;
+    const w = canvas.clientWidth || contentW;
+    const h = canvas.clientHeight || contentH;
+    const classified = [];
+    for (const [a, b] of g.edges) {
+      const ia = idToIndex[a];
+      const ib = idToIndex[b];
+      if (ia == null || ib == null) continue;
+      classified.push({ a, b, ia, ib, kind: edgeKind(coords, ia, ib) });
+    }
+    const order = { diag: 0, other: 1, ortho: 2 };
+    classified.sort((u, v) => order[u.kind] - order[v.kind]);
+    const r = large
+      ? Math.max(3.5, Math.min(7, 90 / Math.sqrt(g.n_vertices)))
+      : Math.max(8, Math.min(16, 220 / Math.sqrt(g.n_vertices)));
+    geom = {
+      key,
+      coords,
+      idToIndex,
+      large,
+      pad,
+      minX,
+      minY,
+      spanX,
+      s,
+      w,
+      h,
+      contentW,
+      contentH,
+      viewW,
+      classified,
+      r,
+      showLabels: !large && (!state.layout || g.n_vertices <= 40),
+    };
+    state.drawGeom = geom;
+  } else {
+    // Keep CSS size stable on hover redraws (do not re-measure / re-expand).
+    canvas.style.minWidth = geom.contentW > geom.viewW ? `${geom.contentW}px` : "";
+    canvas.style.width = geom.contentW > geom.viewW ? `${geom.contentW}px` : "";
+    canvas.style.minHeight = `${Math.max(geom.h, geom.contentH)}px`;
   }
-  const idToIndex = {};
-  g.vertices.forEach((id, i) => { idToIndex[id] = i; });
-  const large = g.n_vertices > 60;
-  // Keep couplers long enough to click; allow the stage to scroll if needed.
-  const MIN_EDGE_PX = large ? 22 : 36;
-  let minEdgeData = Infinity;
-  for (const [a, b] of g.edges || []) {
-    const ia = idToIndex[a];
-    const ib = idToIndex[b];
-    if (ia == null || ib == null) continue;
-    const dx0 = coords[ia][0] - coords[ib][0];
-    const dy0 = coords[ia][1] - coords[ib][1];
-    minEdgeData = Math.min(minEdgeData, Math.hypot(dx0, dy0));
-  }
-  const pad = 28;
-  const spanX = Math.max(maxX - minX, 1e-6);
-  const spanY = Math.max(maxY - minY, 1e-6);
-  const sEdge = Number.isFinite(minEdgeData) && minEdgeData > 1e-9
-    ? MIN_EDGE_PX / minEdgeData
-    : 0;
-  const viewW = canvas.parentElement?.clientWidth || canvas.clientWidth || 900;
-  const viewH = Math.max(280, (canvas.parentElement?.clientHeight || 420) - 48);
-  const sFit = Math.min((viewW - 2 * pad) / spanX, (viewH - 2 * pad) / spanY);
-  const s = Math.max(sFit, sEdge);
-  const contentW = Math.ceil(spanX * s + 2 * pad);
-  const contentH = Math.ceil(spanY * s + 2 * pad + 36);
-  canvas.style.minWidth = contentW > viewW ? `${contentW}px` : "";
-  canvas.style.width = contentW > viewW ? `${contentW}px` : "";
-  canvas.style.minHeight = `${Math.max(viewH, contentH)}px`;
+
+  const {
+    coords, idToIndex, large, pad, minX, minY, spanX, s, w, h, classified, r, showLabels,
+  } = geom;
 
   const dpr = window.devicePixelRatio || 1;
-  const w = canvas.clientWidth || contentW;
-  const h = canvas.clientHeight || contentH;
   canvas.width = Math.floor(w * dpr);
   canvas.height = Math.floor(h * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1337,23 +1421,12 @@ function draw() {
   const hitNodes = [];
   const hitEdges = [];
 
-  // Draw diagonals first (under), then orthogonal grid on top.
-  const classified = [];
-  for (const [a, b] of g.edges) {
-    const ia = idToIndex[a];
-    const ib = idToIndex[b];
-    if (ia == null || ib == null) continue;
-    classified.push({ a, b, ia, ib, kind: edgeKind(coords, ia, ib) });
-  }
-  const order = { diag: 0, other: 1, ortho: 2 };
-  classified.sort((u, v) => order[u.kind] - order[v.kind]);
-
   for (const { a, b, ia, ib, kind } of classified) {
     const [x0, y0] = map(coords[ia]);
     const [x1, y1] = map(coords[ib]);
     hitEdges.push({ a, b, x0, y0, x1, y1 });
-    const key = `${Math.min(ia, ib)}-${Math.max(ia, ib)}`;
-    const isUsed = used.has(key);
+    const edgeKey = `${Math.min(ia, ib)}-${Math.max(ia, ib)}`;
+    const isUsed = used.has(edgeKey);
     const isHover = hover?.kind === "edge" &&
       Math.min(hover.a, hover.b) === Math.min(a, b) &&
       Math.max(hover.a, hover.b) === Math.max(a, b);
@@ -1378,11 +1451,6 @@ function draw() {
     ctx.lineTo(x1, y1);
     ctx.stroke();
   }
-
-  const r = large
-    ? Math.max(3.5, Math.min(7, 90 / Math.sqrt(g.n_vertices)))
-    : Math.max(8, Math.min(16, 220 / Math.sqrt(g.n_vertices)));
-  const showLabels = !large && (!state.layout || g.n_vertices <= 40);
 
   for (let i = 0; i < g.n_vertices; i++) {
     const [x, y] = map(coords[i]);
