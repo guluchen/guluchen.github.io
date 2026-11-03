@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102n";
+const ASSET_V = "20261102o";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -803,11 +803,15 @@ function applyCaseParamsToForm(doc) {
       p.matrix ||
       (id.includes("five-qubit")
         ? "examples/matrices/five-qubit.pcm"
-        : id.includes("steane")
-          ? "examples/matrices/steane-7-1-3.pcm"
-          : id.includes("surface")
-            ? "examples/matrices/surface-9-1-3.pcm"
-            : null);
+        : id.includes("color")
+          ? "examples/matrices/color-triangular-7-1-3.pcm"
+          : id.includes("steane")
+            ? "examples/matrices/steane-7-1-3.pcm"
+            : id.includes("shor")
+              ? "examples/matrices/shor-9-1-3.pcm"
+              : id.includes("surface")
+                ? "examples/matrices/surface-9-1-3.pcm"
+                : null);
     if (matrix && [...el("placeCode").options].some((o) => o.value === matrix)) {
       el("placeCode").value = matrix;
     }

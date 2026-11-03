@@ -140,11 +140,13 @@
         <div id="placeParams">
           <label for="placeCode">Code to place</label>
           <select id="placeCode">
-            <option value="examples/matrices/surface-9-1-3.pcm" selected>Surface [[9,1,3]]</option>
-            <option value="examples/matrices/five-qubit.pcm">Five-qubit [[5,1,3]]</option>
+            <option value="examples/matrices/five-qubit.pcm">Five-qubit / Laflamme [[5,1,3]]</option>
             <option value="examples/matrices/steane-7-1-3.pcm">Steane [[7,1,3]]</option>
+            <option value="examples/matrices/color-triangular-7-1-3.pcm">Color triangular [[7,1,3]]</option>
+            <option value="examples/matrices/surface-9-1-3.pcm" selected>Surface [[9,1,3]]</option>
+            <option value="examples/matrices/shor-9-1-3.pcm">Shor [[9,1,3]]</option>
           </select>
-          <p class="mode-hint">Places a fixed stabilizer matrix onto the selected chip. Default: surface [[9,1,3]] with distinct ancillas.</p>
+          <p class="mode-hint">Named [[n,1,3]] codes with n&lt;10. The triangular color code is the Steane code (smallest color code with d=3). Default: surface.</p>
         </div>
 
         <div class="checks">
@@ -193,6 +195,6 @@
     </aside>
   </main>
 
-  <script src="app.js?v=20261102n"></script>
+  <script src="app.js?v=20261102o"></script>
 </body>
 </html>
