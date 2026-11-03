@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261102j";
+const ASSET_V = "20261102l";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -110,6 +110,10 @@ const state = {
   layout: null,
   jobId: null,
   jobCursor: 0,
+  /** Hit targets from the last draw() for canvas edit (nodes/edges). */
+  drawHit: null,
+  /** { kind:"node"|"edge", ... } under the cursor while editable. */
+  hoverHit: null,
   /**
    * Live session buffer — only Live runs / poll events write here.
    * Static browsing must never mutate this, so switching back restores correctly.
@@ -424,7 +428,8 @@ function graphToElText(g, preferredEl) {
   return lines.join("\n") + "\n";
 }
 
-async function editCurrentGraphAsCustom() {
+async function editCurrentGraphAsCustom(opts = {}) {
+  const { silent = false, focusEditor = true } = opts;
   if (state.mode !== "live") return;
   const g = state.live.graph || state.graph;
   if (!g) {
@@ -453,11 +458,114 @@ async function editCurrentGraphAsCustom() {
   el("presetSelect").value = "custom";
   el("customEl").value = text;
   syncCustomGraphUi();
-  el("customEl").focus();
-  el("customEl").scrollTop = 0;
+  if (focusEditor) {
+    el("customEl").focus();
+    el("customEl").scrollTop = 0;
+  }
   await previewCustomGraph();
-  liveLog(`Editing as custom edge list (from ${g.name || g.id || "graph"}).`, "ok");
+  if (!silent) {
+    liveLog(`Editing as custom edge list (from ${g.name || g.id || "graph"}). Click a node/edge to delete.`, "ok");
+  }
   saveLiveSession();
+}
+
+function isCanvasGraphEditable() {
+  return state.mode === "live" && !!state.live.graph && !state.jobId;
+}
+
+function distToSegment(px, py, x0, y0, x1, y1) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const len2 = dx * dx + dy * dy;
+  if (len2 < 1e-9) return Math.hypot(px - x0, py - y0);
+  let t = ((px - x0) * dx + (py - y0) * dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (x0 + t * dx), py - (y0 + t * dy));
+}
+
+function hitTestGraph(mx, my) {
+  const hit = state.drawHit;
+  if (!hit) return null;
+  let bestNode = null;
+  let bestNodeD = Infinity;
+  for (const n of hit.nodes) {
+    const d = Math.hypot(mx - n.x, my - n.y);
+    if (d <= n.r + 4 && d < bestNodeD) {
+      bestNode = n;
+      bestNodeD = d;
+    }
+  }
+  if (bestNode) return { kind: "node", id: bestNode.id, x: bestNode.x, y: bestNode.y, r: bestNode.r };
+  let bestEdge = null;
+  let bestEdgeD = Infinity;
+  const lim = 7;
+  for (const e of hit.edges) {
+    const d = distToSegment(mx, my, e.x0, e.y0, e.x1, e.y1);
+    if (d <= lim && d < bestEdgeD) {
+      bestEdge = e;
+      bestEdgeD = d;
+    }
+  }
+  if (bestEdge) {
+    return { kind: "edge", a: bestEdge.a, b: bestEdge.b, x0: bestEdge.x0, y0: bestEdge.y0, x1: bestEdge.x1, y1: bestEdge.y1 };
+  }
+  return null;
+}
+
+function elTextRemoveEdge(text, a, b) {
+  const lo = Math.min(a, b);
+  const hi = Math.max(a, b);
+  const re = new RegExp(`^\\s*${lo}\\s+${hi}\\s*$`);
+  const lines = text.split(/\r?\n/).filter((line) => !re.test(line.trim()));
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n");
+}
+
+function elTextRemoveNode(text, id) {
+  const xyRe = new RegExp(`^#\\s*xy\\s+${id}\\b.*$`);
+  const edgeRe = new RegExp(`^\\s*(?:${id}\\s+\\d+|\\d+\\s+${id})\\s*$`);
+  const lines = text.split(/\r?\n/).filter((line) => {
+    const t = line.trim();
+    if (xyRe.test(t)) return false;
+    if (edgeRe.test(t)) return false;
+    return true;
+  });
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n");
+}
+
+async function applyEditedElText(text, note) {
+  el("presetSelect").value = "custom";
+  el("customEl").value = text.endsWith("\n") ? text : text + "\n";
+  state.graphEl.custom = el("customEl").value;
+  syncCustomGraphUi();
+  state.hoverHit = null;
+  setLiveLayout(null);
+  await previewCustomGraph();
+  if (note) liveLog(note, "ok");
+  saveLiveSession();
+}
+
+async function deleteHitFromGraph(hit) {
+  if (!hit || !isCanvasGraphEditable()) return;
+  if (el("presetSelect").value !== "custom") {
+    await editCurrentGraphAsCustom({ silent: true, focusEditor: false });
+  }
+  let text = el("customEl").value;
+  if (hit.kind === "node") {
+    text = elTextRemoveNode(text, hit.id);
+    await applyEditedElText(text, `Deleted node ${hit.id} (and its couplers).`);
+  } else if (hit.kind === "edge") {
+    text = elTextRemoveEdge(text, hit.a, hit.b);
+    await applyEditedElText(text, `Deleted edge ${hit.a}–${hit.b}.`);
+  }
+}
+
+function canvasPointerPos(ev) {
+  const canvas = el("graphCanvas");
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: ((ev.clientX - rect.left) / rect.width) * (canvas.clientWidth || rect.width),
+    y: ((ev.clientY - rect.top) / rect.height) * (canvas.clientHeight || rect.height),
+  };
 }
 
 /** DOM-only log (Static case view). Never touches state.live. */
@@ -1163,7 +1271,11 @@ function draw() {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
 
-  if (!g) return;
+  if (!g) {
+    state.drawHit = null;
+    canvas.style.cursor = "default";
+    return;
+  }
 
   let coords = resolveGraphCoords(g, state.graphEl?.[g.id] || state.graphEl?.custom);
 
@@ -1172,7 +1284,7 @@ function draw() {
     minX = Math.min(minX, x); maxX = Math.max(maxX, x);
     minY = Math.min(minY, y); maxY = Math.max(maxY, y);
   }
-  const pad = g.n_vertices > 60 ? 28 : 28;
+  const pad = 28;
   const sx = (w - 2 * pad) / Math.max(maxX - minX, 1e-6);
   const sy = (h - 2 * pad) / Math.max(maxY - minY, 1e-6);
   const s = Math.min(sx, sy);
@@ -1187,6 +1299,9 @@ function draw() {
   g.vertices.forEach((id, i) => { idToIndex[id] = i; });
   const used = usedEdges(state.layout);
   const large = g.n_vertices > 60;
+  const hover = state.hoverHit;
+  const hitNodes = [];
+  const hitEdges = [];
 
   // Draw diagonals first (under), then orthogonal grid on top.
   const classified = [];
@@ -1194,17 +1309,24 @@ function draw() {
     const ia = idToIndex[a];
     const ib = idToIndex[b];
     if (ia == null || ib == null) continue;
-    classified.push({ ia, ib, kind: edgeKind(coords, ia, ib) });
+    classified.push({ a, b, ia, ib, kind: edgeKind(coords, ia, ib) });
   }
   const order = { diag: 0, other: 1, ortho: 2 };
   classified.sort((u, v) => order[u.kind] - order[v.kind]);
 
-  for (const { ia, ib, kind } of classified) {
+  for (const { a, b, ia, ib, kind } of classified) {
     const [x0, y0] = map(coords[ia]);
     const [x1, y1] = map(coords[ib]);
+    hitEdges.push({ a, b, x0, y0, x1, y1 });
     const key = `${Math.min(ia, ib)}-${Math.max(ia, ib)}`;
     const isUsed = used.has(key);
-    if (isUsed) {
+    const isHover = hover?.kind === "edge" &&
+      Math.min(hover.a, hover.b) === Math.min(a, b) &&
+      Math.max(hover.a, hover.b) === Math.max(a, b);
+    if (isHover) {
+      ctx.strokeStyle = "#e85d4c";
+      ctx.lineWidth = large ? 3.2 : 4.2;
+    } else if (isUsed) {
       ctx.strokeStyle = COLORS.edgeUsed;
       ctx.lineWidth = large ? 1.6 : 2.4;
     } else if (kind === "diag") {
@@ -1230,8 +1352,14 @@ function draw() {
 
   for (let i = 0; i < g.n_vertices; i++) {
     const [x, y] = map(coords[i]);
-    const role = roleOfVertex(state.layout, i);
+    const vid = g.vertices[i];
+    hitNodes.push({ id: vid, x, y, r });
+    const role = state.layout
+      ? roleOfVertex(state.layout, i)
+      : { kind: "unused", label: String(vid) };
+    const isHover = hover?.kind === "node" && hover.id === vid;
     const fill =
+      isHover ? "#e85d4c" :
       role.kind === "data" ? COLORS.data :
       role.kind === "flag" ? COLORS.flag :
       role.kind === "ancX" ? COLORS.ancX :
@@ -1239,22 +1367,25 @@ function draw() {
       role.kind === "anc" ? COLORS.anc :
       COLORS.unused;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.arc(x, y, isHover ? r + 2 : r, 0, Math.PI * 2);
     ctx.fillStyle = fill;
     ctx.fill();
-    ctx.strokeStyle = COLORS.edgeUsed;
+    ctx.strokeStyle = isHover ? "#ffd2cc" : COLORS.edgeUsed;
     ctx.lineWidth = large ? 0.6 : 1;
     ctx.stroke();
-    if (showLabels || (state.layout && role.kind !== "unused")) {
-      const label = large && role.kind === "unused" ? "" : role.label;
+    if (showLabels || (state.layout && role.kind !== "unused") || isHover) {
+      const label = large && role.kind === "unused" && !isHover ? "" : role.label;
       if (!label) continue;
-      ctx.fillStyle = role.kind === "unused" ? "#0e1419" : COLORS.text;
+      ctx.fillStyle = role.kind === "unused" && !isHover ? "#0e1419" : COLORS.text;
       ctx.font = `${Math.max(large ? 7 : 9, r * 0.7)}px "IBM Plex Mono", monospace`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(label, x, y);
     }
   }
+
+  state.drawHit = { nodes: hitNodes, edges: hitEdges };
+  canvas.style.cursor = isCanvasGraphEditable() && hover ? "pointer" : "default";
 
   // Compact legend for grid+diag readability
   if (classified.some((e) => e.kind === "diag")) {
@@ -1540,6 +1671,44 @@ el("presetSelect").addEventListener("change", () => {
 });
 el("editGraphBtn").addEventListener("click", () => {
   editCurrentGraphAsCustom().catch((e) => liveLog(String(e.message || e), "bad"));
+});
+el("graphCanvas").addEventListener("mousemove", (ev) => {
+  if (!isCanvasGraphEditable()) {
+    if (state.hoverHit) {
+      state.hoverHit = null;
+      draw();
+    }
+    el("graphCanvas").style.cursor = "default";
+    return;
+  }
+  const { x, y } = canvasPointerPos(ev);
+  const hit = hitTestGraph(x, y);
+  const prev = state.hoverHit;
+  const same =
+    (!prev && !hit) ||
+    (prev && hit && prev.kind === hit.kind &&
+      ((hit.kind === "node" && prev.id === hit.id) ||
+        (hit.kind === "edge" &&
+          Math.min(prev.a, prev.b) === Math.min(hit.a, hit.b) &&
+          Math.max(prev.a, prev.b) === Math.max(hit.a, hit.b))));
+  if (same) {
+    el("graphCanvas").style.cursor = hit ? "pointer" : "default";
+    return;
+  }
+  state.hoverHit = hit;
+  draw();
+});
+el("graphCanvas").addEventListener("mouseleave", () => {
+  if (!state.hoverHit) return;
+  state.hoverHit = null;
+  draw();
+});
+el("graphCanvas").addEventListener("click", (ev) => {
+  if (!isCanvasGraphEditable()) return;
+  const { x, y } = canvasPointerPos(ev);
+  const hit = hitTestGraph(x, y);
+  if (!hit) return;
+  deleteHitFromGraph(hit).catch((e) => liveLog(String(e.message || e), "bad"));
 });
 el("caseSelect").addEventListener("change", () => {
   if (state.mode !== "static") return;
