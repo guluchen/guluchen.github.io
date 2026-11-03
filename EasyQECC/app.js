@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261103h";
+const ASSET_V = "20261103i";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -139,6 +139,15 @@ const state = {
 };
 
 const el = (id) => document.getElementById(id);
+
+/** Top-bar status. The hint stays on one line; the full text is on the tooltip. */
+function setModeHint(text) {
+  const node = el("modeHint");
+  if (!node) return;
+  node.textContent = text;
+  node.title = text;
+  node.classList.remove("hidden");
+}
 
 function updateRunBadge() {
   el("runBadge").classList.toggle("hidden", !state.jobId);
@@ -641,8 +650,8 @@ async function fetchJson(url, opts) {
     }
     throw e;
   }
-  if (!r.ok) {
-    let detail = r.statusText;
+    if (!r.ok) {
+    let detail = r.statusText || `HTTP ${r.status}`;
     let body = null;
     try {
       body = await r.json();
@@ -870,9 +879,11 @@ function setMode(mode) {
   if (mode === "static") {
     state.liveFormSnapshot = snapshotLiveForm();
     setStaticChrome(true);
-    el("modeHint").textContent = state.jobId
-      ? "Browsing saved cases — Live search keeps running in the background."
-      : "Browse saved runs; settings mirror the case and stay read-only.";
+    setModeHint(
+      state.jobId
+        ? "Browsing saved cases — Live search keeps running in the background."
+        : "Browse saved runs; settings mirror the case and stay read-only."
+    );
     refreshCatalog().then(async () => {
       fillCaseSelect();
       const id = el("caseSelect").value;
@@ -891,9 +902,11 @@ function setMode(mode) {
     applyFormSnapshot(state.liveFormSnapshot);
     state.liveFormSnapshot = null;
     applyLiveToDom();
-    el("modeHint").textContent = state.jobId
-      ? "Live search still running — progress continues below."
-      : liveHintForBackend();
+    setModeHint(
+      state.jobId
+        ? "Live search still running — progress continues below."
+        : liveHintForBackend()
+    );
     syncSaveCaseUi();
   }
   updateRunBadge();
@@ -995,7 +1008,7 @@ async function refreshCatalog() {
   fillPresetSelect();
   if (state.mode === "static") fillCaseSelect();
   syncSaveCaseUi();
-  if (state.mode === "live") el("modeHint").textContent = liveHintForBackend();
+  if (state.mode === "live") setModeHint(liveHintForBackend());
 }
 
 async function loadPresets() {
@@ -1177,14 +1190,19 @@ async function loadCase(id) {
       try {
         g = await fetchJson(`/api/graphs/${doc.graph}`);
       } catch (_) {
-        g = await fetchJson(`graphs/${doc.graph}.json`);
+        g = await fetchJson(`graphs/${doc.graph}.json?v=${ASSET_V}`);
       }
       state.graph = g;
       const tag = st === "found" ? "case" : st;
       el("stageHead").textContent =
         `${g.name || doc.graph}  ·  ${g.n_vertices} qubits  ·  ${g.edges.length} couplers  ·  ${tag} ${id}`;
     } catch (e) {
-      viewLog(String(e.message || e), "bad");
+      state.graph = null;
+      const tag = st === "found" ? "case" : st;
+      el("stageHead").textContent =
+        `${doc.graph}  ·  chip graph unavailable  ·  ${tag} ${id}`;
+      const why = e && e.message ? e.message : String(e);
+      viewLog(`Could not load chip graph “${doc.graph}” (${why}).`, "bad");
     }
   }
   state.layout = doc.layout || null;
@@ -1633,10 +1651,9 @@ async function runLive() {
     updateRunBadge();
     saveLiveSession();
     if (state.mode === "live") {
-      el("modeHint").textContent = liveHintForBackend();
+      setModeHint(liveHintForBackend());
     } else {
-      el("modeHint").textContent =
-        "Browse saved runs; settings mirror the case and stay read-only.";
+      setModeHint("Browse saved runs; settings mirror the case and stay read-only.");
       refreshCatalog().then(() => fillCaseSelect());
     }
   }
@@ -1729,8 +1746,7 @@ function handleEvent(ev) {
       });
     }
     if (state.mode !== "live") {
-      el("modeHint").textContent =
-        "Live search finished — switch back to Live to see the result.";
+      setModeHint("Live search finished — switch back to Live to see the result.");
     }
   } else if (ev.type === "cancelled") {
     liveLog(ev.message || "Cancelled", "bad");
@@ -1875,14 +1891,14 @@ async function boot() {
 
   if (state.jobId && state.jobId !== "wasm" && state.backend === "http") {
     el("runBtn").disabled = true;
-    el("modeHint").textContent = "Resuming Live search after reload…";
+    setModeHint("Resuming Live search after reload…");
     liveLog("(reloaded — resuming progress)", "info");
     try {
       await pollJob(state.jobId, state.jobCursor);
     } finally {
       el("runBtn").disabled = false;
       if (state.mode === "live") {
-        el("modeHint").textContent = liveHintForBackend();
+        setModeHint(liveHintForBackend());
       }
     }
   } else if (state.jobId === "wasm") {
@@ -1891,7 +1907,7 @@ async function boot() {
     state.jobCursor = 0;
     updateRunBadge();
   }
-  if (state.mode === "live") el("modeHint").textContent = liveHintForBackend();
+  if (state.mode === "live") setModeHint(liveHintForBackend());
 }
 
 boot();
