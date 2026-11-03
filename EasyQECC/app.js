@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261103g";
+const ASSET_V = "20261103h";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -1712,6 +1712,15 @@ function handleEvent(ev) {
       }
     } else {
       setLiveLayout(null);
+    }
+    if (ev.status !== "found") {
+      const fpa = Math.max(0, Math.floor(Number(el("fpa").value) || 0));
+      if (fpa > 0) {
+        liveLog(
+          `Hint: φ=${fpa} requires an exclusive idle neighbor per stabilizer. Try Flags per ancilla = 0, or a denser graph (e.g. grid with diagonals).`,
+          "info"
+        );
+      }
     }
     if (ev.status === "found" && el("saveCase").checked) {
       liveLog("Saved into Static cases (if server write succeeded).", "ok");

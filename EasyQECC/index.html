@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20261103g" />
+  <link rel="stylesheet" href="style.css?v=20261103h" />
   <meta http-equiv="Cache-Control" content="no-cache" />
 </head>
 <body>
@@ -167,9 +167,9 @@
           <p class="mode-hint">Default uses DistQLDPC MaxSAT on CSS codes (native serve). WASM Live falls back to local CEGAR. Place ignores this.</p>
         </div>
 
-        <label for="fpa">Flags per ancilla</label>
+        <label for="fpa">Flags per ancilla (φ)</label>
         <input id="fpa" type="number" min="0" step="1" value="0" />
-        <p class="mode-hint">0 = no exclusive flags (default). Extra flags make placement much harder.</p>
+        <p class="mode-hint">Each stabilizer needs φ exclusive idle neighbors of its ancilla (degree ≥ weight+φ). Default 0; φ≥1 is much harder and often impossible on sparse chips.</p>
 
         <label for="timeout">Time limit (seconds per size)</label>
         <input id="timeout" type="number" min="5" value="90" />
@@ -196,6 +196,6 @@
     </aside>
   </main>
 
-  <script src="app.js?v=20261103g"></script>
+  <script src="app.js?v=20261103h"></script>
 </body>
 </html>
