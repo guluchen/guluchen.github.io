@@ -7,24 +7,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20261103e" />
+  <link rel="stylesheet" href="style.css?v=20261103f" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-title">
-      <h1 class="brand">EasyQECC</h1>
+  <header class="topbar">
+    <h1 class="brand">EasyQECC</h1>
+    <div class="mode-switch" role="group" aria-label="Demo mode">
+      <button type="button" id="modeLive" class="active">Live</button>
+      <button type="button" id="modeStatic">Static</button>
     </div>
-    <div class="mode-row">
-      <div class="mode-switch" role="group" aria-label="Demo mode">
-        <button type="button" id="modeLive" class="active">Live</button>
-        <button type="button" id="modeStatic">Static</button>
-      </div>
-      <span class="mode-hint hidden" id="modeHint" aria-live="polite">Detecting backend…</span>
-      <span id="runBadge" class="run-badge hidden">
-        Running
-        <button type="button" id="cancelBadgeBtn">Cancel</button>
-      </span>
-    </div>
+    <span class="mode-hint hidden" id="modeHint" aria-live="polite">Detecting backend…</span>
+    <span id="runBadge" class="run-badge hidden">
+      Running
+      <button type="button" id="cancelBadgeBtn">Cancel</button>
+    </span>
   </header>
 
   <main class="workspace">
@@ -199,6 +195,6 @@
     </aside>
   </main>
 
-  <script src="app.js?v=20261103e"></script>
+  <script src="app.js?v=20261103f"></script>
 </body>
 </html>

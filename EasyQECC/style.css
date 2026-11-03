@@ -36,31 +36,23 @@ body {
   flex-direction: column;
 }
 
-.hero {
-  padding: 0;
-  border-bottom: 1px solid #24323c;
-}
-
-.hero-title {
-  padding: 0.55rem 1rem 0.35rem;
-}
-
-.brand {
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin: 0;
-  line-height: 1.15;
-}
-
-.mode-row {
+.topbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.55rem;
-  padding: 0.35rem 1rem 0.55rem;
-  border-top: 1px solid #24323c;
-  background: rgba(14, 20, 25, 0.35);
+  gap: 0.65rem 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-bottom: 1px solid #24323c;
+  background: rgba(14, 20, 25, 0.55);
+}
+
+.brand {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1;
+  margin-right: 0.25rem;
 }
 
 .run-badge {
