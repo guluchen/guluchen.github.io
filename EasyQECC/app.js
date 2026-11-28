@@ -17,7 +17,7 @@ const COLORS = {
 
 const SESSION_KEY = "easyqecc-demo-live-v5";
 /** Bump when static catalog/assets change so Pages CDN cannot serve stale JSON. */
-const ASSET_V = "20261103i";
+const ASSET_V = "20261103j";
 const DEFAULT_PRESET_ID = "iqm-aphrodite-54";
 const DEFAULT_PLACE_CODE = "examples/matrices/surface-9-1-3.pcm";
 /** Default custom edge list (same as examples/graphs/grid-5x5.el). */
@@ -353,17 +353,24 @@ function pcmFieldsFromLayout(layout) {
   };
 }
 
+/** Escape text for the Live log HTML buffer (no innerHTML parse round-trip). */
+function escapeLogHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /** Push a progress line into the Live buffer; mirror to DOM only in Live mode. */
 function liveLog(msg, cls = "info") {
-  const line = document.createElement("div");
-  line.className = cls;
-  line.textContent = msg;
-  const wrap = document.createElement("div");
-  wrap.innerHTML = state.live.logHtml;
-  wrap.appendChild(line);
-  state.live.logHtml = wrap.innerHTML;
+  const safeCls = cls === "ok" || cls === "bad" ? cls : "info";
+  state.live.logHtml += `<div class="${safeCls}">${escapeLogHtml(msg)}</div>`;
   if (state.mode === "live") {
-    el("log").appendChild(line.cloneNode(true));
+    const line = document.createElement("div");
+    line.className = safeCls;
+    line.textContent = msg;
+    el("log").appendChild(line);
     el("log").scrollTop = el("log").scrollHeight;
   }
   saveLiveSession();
@@ -808,33 +815,52 @@ function fillCaseSelect() {
   else sel.selectedIndex = 0;
 }
 
+/** Map a saved case matrix field / case id onto a <select> option value. */
+function resolvePlaceMatrix(raw, id) {
+  const options = [...el("placeCode").options].map((o) => o.value);
+  const candidates = [];
+  if (raw) {
+    const s = String(raw).trim();
+    candidates.push(s);
+    if (!s.includes("/")) {
+      const base = s.endsWith(".pcm") ? s : `${s}.pcm`;
+      candidates.push(`examples/matrices/${base}`);
+    } else if (!s.endsWith(".pcm")) {
+      candidates.push(`${s}.pcm`);
+    }
+  }
+  const fromId =
+    id.includes("five-qubit")
+      ? "examples/matrices/five-qubit.pcm"
+      : id.includes("css-18-1-3")
+        ? "examples/matrices/css-18-1-3.pcm"
+        : id.includes("css-15-7-3")
+          ? "examples/matrices/css-15-7-3.pcm"
+          : id.includes("css-13-1-3")
+            ? "examples/matrices/css-13-1-3.pcm"
+            : id.includes("color")
+              ? "examples/matrices/color-triangular-7-1-3.pcm"
+              : id.includes("steane")
+                ? "examples/matrices/steane-7-1-3.pcm"
+                : id.includes("shor")
+                  ? "examples/matrices/shor-9-1-3.pcm"
+                  : id.includes("surface")
+                    ? "examples/matrices/surface-9-1-3.pcm"
+                    : null;
+  if (fromId) candidates.push(fromId);
+  for (const c of candidates) {
+    if (c && options.includes(c)) return c;
+  }
+  return null;
+}
+
 function applyCaseParamsToForm(doc) {
   const p = doc.params || {};
   const id = doc.id || "";
   if (id.includes("place") || p.matrix || p.mode === "place") {
     el("runMode").value = "place";
-    const matrix =
-      p.matrix ||
-      (id.includes("five-qubit")
-        ? "examples/matrices/five-qubit.pcm"
-        : id.includes("css-18-1-3")
-          ? "examples/matrices/css-18-1-3.pcm"
-          : id.includes("css-15-7-3")
-            ? "examples/matrices/css-15-7-3.pcm"
-            : id.includes("css-13-1-3")
-              ? "examples/matrices/css-13-1-3.pcm"
-              : id.includes("color")
-                ? "examples/matrices/color-triangular-7-1-3.pcm"
-                : id.includes("steane")
-                  ? "examples/matrices/steane-7-1-3.pcm"
-                  : id.includes("shor")
-                    ? "examples/matrices/shor-9-1-3.pcm"
-                    : id.includes("surface")
-                      ? "examples/matrices/surface-9-1-3.pcm"
-                      : null);
-    if (matrix && [...el("placeCode").options].some((o) => o.value === matrix)) {
-      el("placeCode").value = matrix;
-    }
+    const matrix = resolvePlaceMatrix(p.matrix, id);
+    if (matrix) el("placeCode").value = matrix;
   } else if (p.mode === "search-min-n" || p.search_order === "min-n") {
     const k = Number(p.k_min) || 1;
     el("runMode").value = k === 2 ? "search-min-n-k2" : "search-min-n";
@@ -850,7 +876,14 @@ function applyCaseParamsToForm(doc) {
     el("runMode").value = "search";
     el("kMin").value = String(p.k_min);
   }
-  el("css").checked = !!p.css;
+  // Prefer the solved layout's CSS bit; many older case JSON files omit/mis-set params.css.
+  if (doc.layout && typeof doc.layout.css === "boolean") {
+    el("css").checked = !!doc.layout.css;
+  } else if ("css" in p) {
+    el("css").checked = !!p.css;
+  } else {
+    el("css").checked = false;
+  }
   if ("distinct_ancilla" in p) el("distinct").checked = !!p.distinct_ancilla;
   el("fpa").value = String(p.flags_per_ancilla ?? 0);
   if (p.timeout != null) el("timeout").value = String(p.timeout);
@@ -981,28 +1014,48 @@ async function probeHttpPresets() {
   }
 }
 
+/** Load static presets/cases shipped with the Pages demo (WASM backend). */
+async function loadStaticCatalog() {
+  try {
+    // Cache-bust so Pages CDN does not keep a stale preset catalog.
+    const data = await fetchJson(`presets.json?v=${ASSET_V}`);
+    state.presets = data.presets || [];
+  } catch (_) {
+    liveLog("Could not load presets.", "bad");
+    return false;
+  }
+  try {
+    const idx = await fetchJson(`cases/index.json?v=${ASSET_V}`).catch(() => ({ cases: [] }));
+    state.cases = idx.cases || [];
+  } catch (_) {
+    state.cases = [];
+  }
+  return true;
+}
+
 /** Fetch presets + cases; never auto-loads a graph (avoids clobbering Live). */
 async function refreshCatalog() {
-  try {
-    const data = await probeHttpPresets();
-    state.presets = data.presets || [];
-    state.cases = data.cases || [];
-    state.backend = "http";
-  } catch (_) {
-    state.backend = "wasm";
+  // Once we know we are on Pages / WASM, skip probing /api (avoids console 404 spam).
+  if (state.backend === "wasm") {
+    await loadStaticCatalog();
+  } else if (state.backend === "http") {
     try {
-      // Cache-bust so Pages CDN does not keep a stale preset catalog.
-      const data = await fetchJson(`presets.json?v=${ASSET_V}`);
+      const data = await fetchJson("/api/presets");
       state.presets = data.presets || [];
-    } catch (e) {
-      liveLog("Could not load presets.", "bad");
-      return;
-    }
-    try {
-      const idx = await fetchJson(`cases/index.json?v=${ASSET_V}`).catch(() => ({ cases: [] }));
-      state.cases = idx.cases || [];
+      state.cases = data.cases || [];
     } catch (_) {
-      state.cases = [];
+      state.backend = "wasm";
+      await loadStaticCatalog();
+    }
+  } else {
+    try {
+      const data = await probeHttpPresets();
+      state.presets = data.presets || [];
+      state.cases = data.cases || [];
+      state.backend = "http";
+    } catch (_) {
+      state.backend = "wasm";
+      await loadStaticCatalog();
     }
   }
   fillPresetSelect();
@@ -1113,6 +1166,17 @@ async function previewCustomGraph() {
   }
 }
 
+async function fetchGraphDoc(id) {
+  if (state.backend === "http") {
+    try {
+      return await fetchJson(`/api/graphs/${id}`);
+    } catch (_) {
+      /* fall through to static assets when the local server is mid-restart */
+    }
+  }
+  return fetchJson(`graphs/${id}.json?v=${ASSET_V}`);
+}
+
 async function loadGraph(id) {
   if (id === "custom") {
     syncCustomGraphUi();
@@ -1124,16 +1188,7 @@ async function loadGraph(id) {
     return;
   }
   syncCustomGraphUi();
-  let g;
-  try {
-    if (state.backend === "http") {
-      g = await fetchJson(`/api/graphs/${id}`);
-    } else {
-      throw new Error("use static");
-    }
-  } catch (_) {
-    g = await fetchJson(`graphs/${id}.json?v=${ASSET_V}`);
-  }
+  const g = await fetchGraphDoc(id);
   if (g.el) state.graphEl[id] = g.el;
   else if (!state.graphEl[id]) {
     try {
@@ -1158,10 +1213,14 @@ async function loadCase(id) {
   // Static view only — never write into state.live.
   el("log").textContent = "";
   let doc;
-  try {
-    doc = await fetchJson(`/api/cases/${id}`);
-  } catch (_) {
-    doc = await fetchJson(`cases/${id}.json`);
+  if (state.backend === "http") {
+    try {
+      doc = await fetchJson(`/api/cases/${id}`);
+    } catch (_) {
+      doc = await fetchJson(`cases/${id}.json?v=${ASSET_V}`);
+    }
+  } else {
+    doc = await fetchJson(`cases/${id}.json?v=${ASSET_V}`);
   }
   applyCaseParamsToForm(doc);
   const st = doc.status || (doc.layout ? "found" : "none");
@@ -1177,7 +1236,8 @@ async function loadCase(id) {
     if (doc.params.n != null) bits.push(`n=${doc.params.n}`);
     if (doc.params.m != null) bits.push(`m=${doc.params.m}`);
     if (doc.params.k_min != null) bits.push(`k_min=${doc.params.k_min}`);
-    if (doc.params.css) bits.push("css");
+    const cssOn = doc.layout && typeof doc.layout.css === "boolean" ? doc.layout.css : !!doc.params.css;
+    if (cssOn) bits.push("css");
     if (doc.params.distinct_ancilla) bits.push("distinct-ancilla");
     if (doc.params.flags_per_ancilla) bits.push(`flags/ancilla=${doc.params.flags_per_ancilla}`);
     if (doc.params.timeout) bits.push(`timeout=${doc.params.timeout}s`);
@@ -1186,12 +1246,7 @@ async function loadCase(id) {
   // Do not dump raw solver logs (they leak SAT jargon). Message above is enough.
   if (doc.graph) {
     try {
-      let g;
-      try {
-        g = await fetchJson(`/api/graphs/${doc.graph}`);
-      } catch (_) {
-        g = await fetchJson(`graphs/${doc.graph}.json?v=${ASSET_V}`);
-      }
+      const g = await fetchGraphDoc(doc.graph);
       state.graph = g;
       const tag = st === "found" ? "case" : st;
       el("stageHead").textContent =
@@ -1443,7 +1498,8 @@ function draw() {
     const [x0, y0] = map(coords[ia]);
     const [x1, y1] = map(coords[ib]);
     hitEdges.push({ a, b, x0, y0, x1, y1 });
-    const edgeKey = `${Math.min(ia, ib)}-${Math.max(ia, ib)}`;
+    // usedEdges stores vertex ids (same as a/b), not index positions.
+    const edgeKey = `${Math.min(a, b)}-${Math.max(a, b)}`;
     const isUsed = used.has(edgeKey);
     const isHover = hover?.kind === "edge" &&
       Math.min(hover.a, hover.b) === Math.min(a, b) &&
@@ -1475,7 +1531,7 @@ function draw() {
     const vid = g.vertices[i];
     hitNodes.push({ id: vid, x, y, r });
     const role = state.layout
-      ? roleOfVertex(state.layout, i)
+      ? roleOfVertex(state.layout, vid)
       : { kind: "unused", label: String(vid) };
     const isHover = hover?.kind === "node" && hover.id === vid;
     const fill =
@@ -1721,12 +1777,8 @@ function handleEvent(ev) {
     const cls = ev.status === "found" ? "ok" : "bad";
     liveLog(ev.message || "Done", cls);
     if (ev.layout) {
+      // Parity-check panel already lists S1…Sm — avoid duplicating them in Progress.
       setLiveLayout(ev.layout);
-      const rows = stabilizerPauliStrings(ev.layout);
-      if (rows.length) {
-        liveLog("Parity checks:", "info");
-        for (let i = 0; i < rows.length; i++) liveLog(`  S${i + 1}: ${rows[i]}`, "ok");
-      }
     } else {
       setLiveLayout(null);
     }
