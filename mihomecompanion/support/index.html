@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>家裡小幫手 - 支援</title>
+  <meta name="description" content="家裡小幫手 App 支援與常見問題">
+  <style>
+    :root { color-scheme:light dark; --accent:#df625b; --teal:#159f9a; --ink:#17191d; --muted:#667085; --line:#dfe3e8; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.7; background:#f7f8fa; color:var(--ink); }
+    header { background:var(--ink); color:white; }
+    .wrap { width:min(800px,calc(100% - 40px)); margin:auto; }
+    header .wrap { padding:52px 0 42px; }
+    .brand { color:#77d8d2; font-weight:700; }
+    h1 { margin:8px 0 4px; font-size:clamp(32px,6vw,52px); line-height:1.15; letter-spacing:0; }
+    header p { margin:8px 0 0; color:#c9cdd5; }
+    main { padding:30px 0 64px; }
+    section { padding:24px 0; border-bottom:1px solid var(--line); }
+    h2 { margin:0 0 8px; font-size:21px; letter-spacing:0; }
+    p, ol { margin:8px 0; }
+    ol { padding-left:1.35rem; }
+    a { color:var(--teal); text-underline-offset:3px; }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; }
+    .button { display:inline-flex; align-items:center; min-height:46px; padding:9px 16px; border-radius:8px; background:var(--ink); color:white; text-decoration:none; font-weight:700; }
+    .secondary { background:var(--teal); }
+    footer { padding:24px 0 44px; color:var(--muted); font-size:14px; }
+    @media (prefers-color-scheme:dark) { body{background:#111317;color:#f2f4f7} :root{--line:#343842;--muted:#a7adba} }
+  </style>
+</head>
+<body>
+  <header><div class="wrap">
+    <div class="brand">家裡小幫手</div>
+    <h1>支援與常見問題</h1>
+    <p>Android TV 遙控、體脂計、Apple 健康與 Apple Watch</p>
+  </div></header>
+  <main class="wrap">
+    <section>
+      <h2>電視搜尋不到或無法配對</h2>
+      <ol>
+        <li>確認 iPhone 與 Android TV 在同一個 Wi-Fi。</li>
+        <li>在 App 的「遙控器」頁點右上角「…」，使用 Bonjour 搜尋或直接輸入電視 IP。</li>
+        <li>電視若沒有顯示配對碼，請確認 Android TV Remote Service 已啟用，必要時重新啟動電視後再試。</li>
+      </ol>
+    </section>
+    <section>
+      <h2>第二支手機讓第一支手機失去控制</h2>
+      <p>請將兩支手機都更新到最新版本，並讓每支手機各自完成一次配對。App 會為每台手機建立獨立的安全身分，減少互相搶線。</p>
+    </section>
+    <section>
+      <h2>體脂計只有體重，沒有體脂</h2>
+      <p>XMTZC01YM 需要完成小米帳號安全綁定、使用者辨識，並讓雙腳與雙手完整接觸八個電極。看到 Pose 通常表示腳掌或手掌接觸不完整。</p>
+    </section>
+    <section>
+      <h2>步數或健康紀錄沒有更新</h2>
+      <p>請到「設定 → 隱私權與安全性 → 健康 → 家裡小幫手」確認步數、體重與體脂權限。健康資料由 Apple 健康管理，App 無法判斷使用者是否拒絕讀取某一種資料。</p>
+    </section>
+    <section>
+      <h2>Apple Watch 沒有反應</h2>
+      <p>確認手錶與 iPhone 已連線，且兩者使用同一版 App。手錶可直接連到同一個 Wi-Fi 上已配對的電視；必要時先在 iPhone App 重新開啟一次遙控器頁面。</p>
+    </section>
+    <section>
+      <h2>回報問題</h2>
+      <p>請附上裝置型號、iOS／watchOS 版本、App 版本與重現步驟。體脂計問題可在工程模式複製診斷內容，但請先移除不想公開的帳號或裝置資訊。</p>
+      <div class="actions">
+        <a class="button" href="https://github.com/guluchen/guluchen.github.io/issues/new">在 GitHub 回報</a>
+        <a class="button secondary" href="../privacy/">查看隱私權政策</a>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">家裡小幫手為獨立開發 App。Android TV 與體脂計功能需要相容硬體。</footer>
+</body>
+</html>
